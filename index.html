@@ -878,6 +878,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div class="persona-row"><span class="l">Varios Agus</span><span class="v minus" id="agus-varios">—</span></div>
           <div class="persona-row"><span class="l">½ Varios nuestros</span><span class="v minus" id="agus-vn">—</span></div>
           <div class="persona-row"><span class="l">½ Varios casa</span><span class="v minus" id="agus-vc">—</span></div>
+          <div class="persona-row"><span class="l">Ajuste Rev - Agus</span><span class="v" id="agus-rev-ajuste">—</span></div>
           <div class="persona-row final"><span class="l">Plata libre</span><span class="v" id="agus-libre">—</span></div>
         </div>
         <div class="persona sofi">
@@ -887,6 +888,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div class="persona-row"><span class="l">Varios Sofi</span><span class="v minus" id="sofi-varios">—</span></div>
           <div class="persona-row"><span class="l">½ Varios nuestros</span><span class="v minus" id="sofi-vn">—</span></div>
           <div class="persona-row"><span class="l">½ Varios casa</span><span class="v minus" id="sofi-vc">—</span></div>
+          <div class="persona-row"><span class="l">Ajuste Rev - Sofi</span><span class="v" id="sofi-rev-ajuste">—</span></div>
           <div class="persona-row final"><span class="l">Plata libre</span><span class="v" id="sofi-libre">—</span></div>
         </div>
       </div>
@@ -951,6 +953,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <tr>
             <th class="col-narrow">Mes</th>
             <th class="col-wide">Descripción / Comentario</th>
+            <th class="col-medium">Categoría</th>
             <th class="r col-medium">Monto</th>
             <th class="c col-narrow">Acciones</th>
           </tr>
@@ -1021,7 +1024,7 @@ button,select,input{font-family:inherit;font-size:inherit}
             <th class="col-wide">Descripción</th>
             <th class="col-medium">Categoría</th>
             <th class="r col-medium">Monto</th>
-            <th class="c col-narrow">Acciones</th>
+            <th class="c col-narrow">Mensualidad</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -1324,6 +1327,7 @@ function parseBCGEFromRows(arr){
       chf, categoria: String(cat).trim(),
       cuenta: r[4] || '',
       comments: r[5] || '',
+      esMensualidad: parseBoolean(r[6]),
       _state: 'clean'
     });
   }
@@ -1366,6 +1370,11 @@ function normHeader(value){
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function parseBoolean(value){
+  const v = String(value ?? '').toLowerCase().trim();
+  return value === true || value === 1 || v === '1' || v === 'true' || v === 'yes' || v === 'sí' || v === 'si';
 }
 
 function findBudgetsLayout(arr){
@@ -1464,10 +1473,11 @@ function paidForCategory(cat, mes){
   const c = CATEGORIES.find(x => x.name === cat);
   if (!c) return 0;
   if (c.source === 'COMPUTED'){
-    // Mensualidades: pagado = SOLO transferencias marcadas con el toggle "Mensualidad".
-    // Los otros movimientos Rev son ajustes personales y entran en el esperado ajustado/plata libre.
+    // Mensualidades: cuenta solo las filas marcadas explícitamente como "Es mensualidad".
+    // Esto permite que Rev - Agus / Rev - Sofi tenga otros ajustes personales
+    // sin alterar el control de transferencia mensual.
     if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-      return getRevMensualidadPaid(cat, mes);
+      return sumMonthlyTransfers(cat, mes);
     }
     return 0;
   }
@@ -1485,65 +1495,20 @@ function sumBCGE(cat, mes){
     .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
     .reduce((s, r) => s + r.chf, 0);
 }
+function sumMonthlyTransfers(cat, mes){
+  return bcgeRows
+    .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && r.esMensualidad && r.chf < 0)
+    .reduce((s, r) => s + Math.abs(r.chf), 0);
+}
+function sumRevAdjustment(cat, mes){
+  return bcgeRows
+    .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad)
+    .reduce((s, r) => s + r.chf, 0);
+}
 function sumTarjeta(cat, mes){
   return tarjetaRows
     .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
     .reduce((s, r) => s + r.chf, 0);
-}
-
-function revCatForPerson(person){
-  return person === 'Agus' ? 'Rev - Agus' : 'Rev - Sofi';
-}
-
-function personForRevCat(cat){
-  if (cat === 'Rev - Agus') return 'Agus';
-  if (cat === 'Rev - Sofi') return 'Sofi';
-  return null;
-}
-
-function getRevAdjustment(cat, mes){
-  // Ajustes Rev = movimientos Rev que NO son la transferencia mensual.
-  // Se mantiene el signo: gastos negativos reducen la plata libre; ingresos positivos la aumentan.
-  return bcgeRows
-    .filter(r =>
-      r._state !== 'deleted' &&
-      r.categoria === cat &&
-      r.mes === mes &&
-      r.año === currentYear &&
-      !r.esMensualidad
-    )
-    .reduce((s, r) => s + r.chf, 0);
-}
-
-function getRevMensualidadPaid(cat, mes){
-  // Pagado mensualidad = suma absoluta de las transferencias marcadas como mensualidad.
-  return bcgeRows
-    .filter(r =>
-      r._state !== 'deleted' &&
-      r.categoria === cat &&
-      r.mes === mes &&
-      r.año === currentYear &&
-      r.esMensualidad
-    )
-    .reduce((s, r) => s + Math.abs(r.chf), 0);
-}
-
-function getPlataLibreData(person, mes){
-  const revCat = revCatForPerson(person);
-  const nominal = budgetForCategory(revCat, mes);
-  const tarjeta = Math.abs(paidForCategory(person, mes));
-  const varios = Math.abs(paidForCategory(person === 'Agus' ? 'Varios Agus' : 'Varios Sofi', mes));
-  const halfVN = Math.abs(paidForCategory('Varios nuestros', mes)) / 2;
-  const halfVC = Math.abs(paidForCategory('Varios Casa', mes)) / 2;
-  const revAjuste = getRevAdjustment(revCat, mes);
-  const libre = nominal - tarjeta - varios - halfVN - halfVC + revAjuste;
-  return {nominal, tarjeta, varios, halfVN, halfVC, revAjuste, libre};
-}
-
-function expectedMensualidadForCategory(cat, mes){
-  const person = personForRevCat(cat);
-  if (!person) return budgetForCategory(cat, mes);
-  return getPlataLibreData(person, mes).libre;
 }
 
 function budgetForCategory(cat, mes){
@@ -1552,20 +1517,32 @@ function budgetForCategory(cat, mes){
 function isValidated(cat, mes){
   return !!budgetData[cat]?.[mes]?.validated;
 }
-function expectedForCategory(cat, mes){
-  // Para mensualidades, el esperado es la plata libre ajustada de cada persona.
-  // No se fuerza a pagado cuando está validado, así el detalle sigue siendo auditable.
-  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi') return expectedMensualidadForCategory(cat, mes);
 
-  // Para el resto: si está validado, usa pagado. Si no, usa budget.
+// Plata libre / Esperado para Rev - Agus / Rev - Sofi
+// Es el mismo cálculo en los dos lugares: budget − tarjeta − varios − ½ nuestros − ½ casa + ajustes Rev no marcados como mensualidad
+// "ajustes" = Rev - Agus que NO son mensualidad oficial (ej: te transferiste 200 de adelanto sin marcarlo como mens)
+//   Esos 200 ya te los gastaste/cobraste, así que se restan del Plata libre.
+function plataLibreFor(person, mes){
+  const cat = 'Rev - ' + person;
+  const nominal = budgetForCategory(cat, mes);
+  const tarjetaPersonal = Math.abs(paidForCategory(person, mes));  // Tarjeta categoría 'Agus' o 'Sofi'
+  const variosPersonal = Math.abs(paidForCategory('Varios ' + person, mes));
+  const halfVN = Math.abs(paidForCategory('Varios nuestros', mes)) / 2;
+  const halfVC = Math.abs(paidForCategory('Varios Casa', mes)) / 2;
+  const ajusteRev = sumRevAdjustment(cat, mes); // negativo si te adelantaste (gasto)
+  return nominal - tarjetaPersonal - variosPersonal - halfVN - halfVC + ajusteRev;
+}
+
+function expectedForCategory(cat, mes){
+  // Para Rev-Agus / Rev-Sofi: Esperado = Plata libre (mismo cálculo)
+  if (cat === 'Rev - Agus') return plataLibreFor('Agus', mes);
+  if (cat === 'Rev - Sofi') return plataLibreFor('Sofi', mes);
+  // Para el resto: si validado → pagado; si no → budget
   if (isValidated(cat, mes)) return paidForCategory(cat, mes);
   return budgetForCategory(cat, mes);
 }
 function pendingForCategory(cat, mes){
-  const expected = expectedForCategory(cat, mes);
-  const paid = paidForCategory(cat, mes);
-  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi') return Math.max(0, expected - paid);
-  return expected - paid;
+  return expectedForCategory(cat, mes) - paidForCategory(cat, mes);
 }
 
 function totalBySection(section, mes){
@@ -1640,19 +1617,26 @@ function renderMonthTabs(){
 
 function renderDashboard(){
   // KPIs
-  // Ingresos: usar todos los ingresos reales positivos de las cuentas Agus + Sofi.
-  // Si no hay ingresos reales para el mes, caer al budget.
+  // Ingresos: usar ingresos reales positivos de BCGE si existen; si no, usar budget.
+  // Esto mantiene el KPI alineado con el detalle de cuentas y la pestaña Ingresos.
   const ingresosReal = bcgeRows
-    .filter(r => r._state !== 'deleted' && r.año === currentYear && r.mes === currentMonth && r.chf > 0 && ['Agus','Sofi'].includes((r.cuenta || '').trim()))
+    .filter(r => r._state !== 'deleted'
+      && r.año === currentYear
+      && r.mes === currentMonth
+      && r.chf > 0
+      && ['Agus', 'Sofi'].includes((r.cuenta || '').trim()))
     .reduce((s, r) => s + r.chf, 0);
-  const ingresosBudget = CATEGORIES.filter(c=>c.section==='INGRESOS').reduce((s,c)=>s+budgetForCategory(c.name, currentMonth), 0);
-  const ingresos = ingresosReal !== 0 ? ingresosReal : ingresosBudget;
+  const ingresosBudgetTotal = CATEGORIES
+    .filter(c => c.section === 'INGRESOS')
+    .reduce((s, c) => s + budgetForCategory(c.name, currentMonth), 0);
+  const ingresos = ingresosReal !== 0 ? ingresosReal : ingresosBudgetTotal;
   const gastos = totalBySection('FIJOS', currentMonth) + totalBySection('TARJETA', currentMonth) +
                  totalBySection('ANUALES', currentMonth) + totalBySection('OTROS', currentMonth);
   const mens = totalBySection('MENSUALIDADES', currentMonth);
   const ahorros = totalBySection('AHORROS', currentMonth);
   const balance = ingresos - gastos - mens - ahorros;
 
+  const ingresosBudget = ingresosBudgetTotal;
   const gastosBudget = CATEGORIES.filter(c=>['FIJOS','TARJETA','ANUALES','OTROS'].includes(c.section)).reduce((s,c)=>s+budgetForCategory(c.name, currentMonth), 0);
 
   document.getElementById('kpi-ingresos').innerHTML = fmtCHF(ingresos);
@@ -1894,25 +1878,40 @@ function escCloseHandler(e){
 }
 
 function renderPersonas(){
-  const agus = getPlataLibreData('Agus', currentMonth);
-  document.getElementById('agus-mens').textContent = fmt(agus.nominal);
-  document.getElementById('agus-tarjeta').textContent = '−' + fmt(agus.tarjeta);
-  document.getElementById('agus-varios').textContent = '−' + fmt(agus.varios);
-  document.getElementById('agus-vn').textContent = '−' + fmt(agus.halfVN);
-  document.getElementById('agus-vc').textContent = '−' + fmt(agus.halfVC);
-  const agusAjusteEl = document.getElementById('agus-rev-ajuste');
-  if (agusAjusteEl) agusAjusteEl.textContent = fmtSign(agus.revAjuste);
-  document.getElementById('agus-libre').innerHTML = (agus.libre < 0 ? '−' : '') + fmtCHF(Math.abs(agus.libre));
+  // AGUS - desglose visible (componentes individuales)
+  const agusNom = budgetForCategory('Rev - Agus', currentMonth);
+  const agusTar = Math.abs(paidForCategory('Agus', currentMonth));
+  const agusVar = Math.abs(paidForCategory('Varios Agus', currentMonth));
+  const halfVN = Math.abs(paidForCategory('Varios nuestros', currentMonth)) / 2;
+  const halfVC = Math.abs(paidForCategory('Varios Casa', currentMonth)) / 2;
+  const agusRevAjuste = sumRevAdjustment('Rev - Agus', currentMonth);
+  // Total: usa la función central plataLibreFor para garantizar consistencia con Esperado
+  const agusLibre = plataLibreFor('Agus', currentMonth);
 
-  const sofi = getPlataLibreData('Sofi', currentMonth);
-  document.getElementById('sofi-mens').textContent = fmt(sofi.nominal);
-  document.getElementById('sofi-tarjeta').textContent = '−' + fmt(sofi.tarjeta);
-  document.getElementById('sofi-varios').textContent = '−' + fmt(sofi.varios);
-  document.getElementById('sofi-vn').textContent = '−' + fmt(sofi.halfVN);
-  document.getElementById('sofi-vc').textContent = '−' + fmt(sofi.halfVC);
-  const sofiAjusteEl = document.getElementById('sofi-rev-ajuste');
-  if (sofiAjusteEl) sofiAjusteEl.textContent = fmtSign(sofi.revAjuste);
-  document.getElementById('sofi-libre').innerHTML = (sofi.libre < 0 ? '−' : '') + fmtCHF(Math.abs(sofi.libre));
+  document.getElementById('agus-mens').textContent = fmt(agusNom);
+  document.getElementById('agus-tarjeta').textContent = '−' + fmt(agusTar);
+  document.getElementById('agus-varios').textContent = '−' + fmt(agusVar);
+  document.getElementById('agus-vn').textContent = '−' + fmt(halfVN);
+  document.getElementById('agus-vc').textContent = '−' + fmt(halfVC);
+  document.getElementById('agus-rev-ajuste').textContent = fmtSign(agusRevAjuste);
+  document.getElementById('agus-rev-ajuste').className = 'v ' + (agusRevAjuste < 0 ? 'minus' : '');
+  document.getElementById('agus-libre').innerHTML = fmtCHF(agusLibre);
+
+  // SOFI
+  const sofiNom = budgetForCategory('Rev - Sofi', currentMonth);
+  const sofiTar = Math.abs(paidForCategory('Sofi', currentMonth));
+  const sofiVar = Math.abs(paidForCategory('Varios Sofi', currentMonth));
+  const sofiRevAjuste = sumRevAdjustment('Rev - Sofi', currentMonth);
+  const sofiLibre = plataLibreFor('Sofi', currentMonth);
+
+  document.getElementById('sofi-mens').textContent = fmt(sofiNom);
+  document.getElementById('sofi-tarjeta').textContent = '−' + fmt(sofiTar);
+  document.getElementById('sofi-varios').textContent = '−' + fmt(sofiVar);
+  document.getElementById('sofi-vn').textContent = '−' + fmt(halfVN);
+  document.getElementById('sofi-vc').textContent = '−' + fmt(halfVC);
+  document.getElementById('sofi-rev-ajuste').textContent = fmtSign(sofiRevAjuste);
+  document.getElementById('sofi-rev-ajuste').className = 'v ' + (sofiRevAjuste < 0 ? 'minus' : '');
+  document.getElementById('sofi-libre').innerHTML = fmtCHF(sofiLibre);
 }
 
 function renderSectionTable(section, tblId, totalId){
@@ -1945,7 +1944,7 @@ function renderSectionTable(section, tblId, totalId){
   filtered.forEach(c => {
     const expected = expectedForCategory(c.name, currentMonth);
     const paid = paidForCategory(c.name, currentMonth);
-    const pending = pendingForCategory(c.name, currentMonth);
+    const pending = expected - paid;
     const validated = isValidated(c.name, currentMonth);
     totExp += expected;
     totPaid += paid;
@@ -1973,9 +1972,7 @@ function renderSectionTable(section, tblId, totalId){
   // Total
   const totRow = document.createElement('tr');
   totRow.className = 'total';
-  const totPending = cats[0]?.section === 'MENSUALIDADES'
-    ? filtered.reduce((s, c) => s + pendingForCategory(c.name, currentMonth), 0)
-    : totExp - totPaid;
+  const totPending = totExp - totPaid;
   totRow.innerHTML = `
     <td class="label">Total</td>
     <td class="num">${fmt(totExp)}</td>
@@ -2011,13 +2008,6 @@ function updatePendingBanner(){
 // =============================================================
 // INGRESOS TAB
 // =============================================================
-function ingresoCategoryOptions(selected){
-  const cats = CATEGORIES
-    .filter(c => c.source === 'BCGE' || c.source === 'COMPUTED')
-    .map(c => c.name);
-  if (selected && !cats.includes(selected)) cats.unshift(selected);
-  return cats.map(c => `<option value="${escapeHTML(c)}" ${c === selected ? 'selected' : ''}>${escapeHTML(c)}</option>`).join('');
-}
 function renderIngresos(){
   // Setup sub-tabs handlers (idempotente)
   document.querySelectorAll('#ingresos-subtabs .sub-tab').forEach(btn => {
@@ -2038,7 +2028,9 @@ function renderIngresos(){
   }
   const fMes = mesSel.value;
 
-  // Filtrar ingresos reales: cualquier movimiento positivo de la cuenta/persona.
+  // Filtrar ingresos reales: todos los movimientos BCGE POSITIVOS de la cuenta/persona activa.
+  // Antes se filtraba solo por categoría BCGE Agus / BCGE Sofi, lo que dejaba afuera
+  // ingresos positivos categorizados como Rev - Agus, Rev - Sofi, devoluciones, ventas, etc.
   let rows = bcgeRows.filter(r =>
     r._state !== 'deleted' &&
     (r.cuenta || '').trim() === currentIngresoPerson &&
@@ -2048,7 +2040,7 @@ function renderIngresos(){
   if (fMes) rows = rows.filter(r => r.mes === fMes);
   rows.sort((a, b) => MESES.indexOf(a.mes) - MESES.indexOf(b.mes));
 
-  // Stats: si hay filtro de mes, total año = solo del mes; sino, todo el año
+  // Stats anuales: todos los ingresos positivos reales de la cuenta/persona activa.
   const allRowsForCat = bcgeRows.filter(r =>
     r._state !== 'deleted' &&
     (r.cuenta || '').trim() === currentIngresoPerson &&
@@ -2056,7 +2048,7 @@ function renderIngresos(){
     r.chf > 0
   );
   const totalAnual = allRowsForCat.reduce((s, r) => s + r.chf, 0);
-  const promedio = allRowsForCat.length ? totalAnual / 12 : 0;
+  const promedio = totalAnual / 12;
 
   document.getElementById('ingresos-total-anual').textContent = fmt(totalAnual);
   document.getElementById('ingresos-promedio').textContent = fmt(promedio);
@@ -2083,7 +2075,7 @@ function renderIngresos(){
     tr.innerHTML = `
       <td><select class="ingreso-mes" data-id="${r.id}">${monthOptions(r.mes)}</select></td>
       <td><input type="text" class="ingreso-comments" data-id="${r.id}" value="${escapeHTML(r.comments || '')}" placeholder="Sueldo, bonus, reembolso..."></td>
-      <td><select class="ingreso-cat" data-id="${r.id}">${ingresoCategoryOptions(r.categoria)}</select></td>
+      <td><select class="ingreso-categoria" data-id="${r.id}">${ingresoCategoryOptions(r.categoria)}</select></td>
       <td><input type="number" class="ingreso-chf num" data-id="${r.id}" value="${r.chf}" step="0.01"></td>
       <td class="center">
         <button class="row-action-btn" title="Borrar" onclick="deleteRow('bcge', ${r.id})">
@@ -2096,7 +2088,7 @@ function renderIngresos(){
 
   tbody.querySelectorAll('.ingreso-mes').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'mes', e.target.value));
   tbody.querySelectorAll('.ingreso-comments').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'comments', e.target.value));
-  tbody.querySelectorAll('.ingreso-cat').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'categoria', e.target.value));
+  tbody.querySelectorAll('.ingreso-categoria').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'categoria', e.target.value));
   tbody.querySelectorAll('.ingreso-chf').forEach(el => el.onchange = e => {
     let v = parseFloat(e.target.value) || 0;
     if (v < 0) v = Math.abs(v); // ingresos siempre positivos
@@ -2124,6 +2116,17 @@ function addIngreso(){
   renderIngresos();
   renderDashboard();
   renderForecast();
+}
+
+
+function ingresoCategoryOptions(selected){
+  // Categorías permitidas para ingresos positivos en BCGE.
+  // Incluye categorías de ingresos formales y mensualidades/reembolsos positivos que pueden aparecer en cuenta.
+  const opts = CATEGORIES
+    .filter(c => c.source === 'BCGE' || c.source === 'COMPUTED')
+    .map(c => c.name);
+  if (selected && !opts.includes(selected)) opts.unshift(selected);
+  return [...new Set(opts)].map(c => `<option value="${escapeHTML(c)}" ${c === selected ? 'selected' : ''}>${escapeHTML(c)}</option>`).join('');
 }
 
 function monthOptions(selected){
@@ -2292,9 +2295,9 @@ function renderGastos(){
       <td><select class="gasto-cat" data-id="${r.id}" data-source="${r.source}">${catOptionsHtml(r.categoria, r.source)}</select></td>
       <td><input type="number" class="gasto-chf num" data-id="${r.id}" data-source="${r.source}" value="${r.source === 'BCGE' ? Math.abs(r.chf) : r.chf}" step="0.01"></td>
       <td class="center">
-        ${r.source === 'BCGE'
-          ? `<div class="check-cell"><span class="check-toggle mensualidad-toggle ${r.esMensualidad ? 'checked' : ''}" data-id="${r.id}" title="Marcar como transferencia de mensualidad"></span></div>`
-          : `<span style="color:var(--ink-faint);font-size:12px">—</span>`}
+        ${(r.source === 'BCGE' && (r.categoria === 'Rev - Agus' || r.categoria === 'Rev - Sofi'))
+          ? `<input type="checkbox" class="gasto-mensualidad" data-id="${r.id}" data-source="${r.source}" ${r.esMensualidad ? 'checked' : ''} title="Marcar como mensualidad oficial (transferencia mensual a Revolut)">`
+          : `<span style="color:var(--ink-ghost);font-size:11px">—</span>`}
       </td>
     `;
     tbody.appendChild(tr);
@@ -2317,21 +2320,9 @@ function renderGastos(){
     if (src === 'bcge' && val > 0) val = -val;
     editRowField(src, +e.target.dataset.id, 'chf', val);
   });
-  tbody.querySelectorAll('.mensualidad-toggle').forEach(el => el.onclick = () => {
-    toggleMensualidad(+el.dataset.id);
+  tbody.querySelectorAll('.gasto-mensualidad').forEach(el => el.onchange = e => {
+    editRowField('bcge', +e.target.dataset.id, 'esMensualidad', e.target.checked);
   });
-}
-
-function toggleMensualidad(id){
-  const row = bcgeRows.find(r => r.id === id);
-  if (!row) return;
-  row.esMensualidad = !row.esMensualidad;
-  if (row._state === 'clean') row._state = 'modified';
-  dirtyChanges++;
-  updatePendingBanner();
-  renderGastos();
-  renderDashboard();
-  renderForecast();
 }
 
 function addGasto(){
@@ -2412,6 +2403,7 @@ function editRowField(table, id, field, value){
   const row = arr.find(r => r.id === id);
   if (!row) return;
   if (row[field] === value) return;
+  const oldValue = row[field];
   row[field] = value;
   if (row._state === 'clean') row._state = 'modified';
   dirtyChanges++;
@@ -2419,6 +2411,20 @@ function editRowField(table, id, field, value){
   // Re-render dashboard y forecast (no re-render gastos para no perder foco)
   renderDashboard();
   renderForecast();
+
+  // Caso especial: si cambió la categoría a/desde Rev-Agus/Rev-Sofi, re-render Gastos
+  // para que aparezca/desaparezca el toggle "Es mensualidad"
+  if (field === 'categoria' && table === 'bcge'){
+    const wasRev = oldValue === 'Rev - Agus' || oldValue === 'Rev - Sofi';
+    const isRev = value === 'Rev - Agus' || value === 'Rev - Sofi';
+    if (wasRev !== isRev){
+      renderGastos();
+      return; // ya re-renderizó todo, salimos
+    }
+  }
+  // Si cambió esMensualidad, también re-render gastos por si actualizamos algo visual
+  // (el listado de Mensualidades del dashboard ya se actualiza vía renderDashboard)
+
   // Marcar fila como dirty visualmente
   const tr = document.querySelector(`tr[data-row-id="${id}"]`);
   if (tr && row._state === 'modified') tr.classList.add('dirty-row');
