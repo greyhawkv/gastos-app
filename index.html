@@ -2502,7 +2502,9 @@ function renderGastos(){
       <td><select class="gasto-cat" data-id="${r.id}" data-source="${r.source}">${catOptionsHtml(r.categoria, r.source)}</select></td>
       <td><input type="number" class="gasto-chf num" data-id="${r.id}" data-source="${r.source}" value="${r.source === 'BCGE' ? Math.abs(r.chf) : r.chf}" step="0.01"></td>
       <td class="center">
-        <input type="checkbox" class="gasto-mensualidad" data-id="${r.id}" data-source="${r.source}" ${r.esMensualidad ? 'checked' : ''} ${r.source !== 'BCGE' ? 'disabled' : ''} title="Es mensualidad">
+        ${(r.source === 'BCGE' && (r.categoria === 'Rev - Agus' || r.categoria === 'Rev - Sofi'))
+          ? `<input type="checkbox" class="gasto-mensualidad" data-id="${r.id}" data-source="${r.source}" ${r.esMensualidad ? 'checked' : ''} title="Marcar como mensualidad oficial (transferencia mensual a Revolut)">`
+          : `<span style="color:var(--ink-ghost);font-size:11px">—</span>`}
       </td>
     `;
     tbody.appendChild(tr);
