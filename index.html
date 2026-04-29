@@ -399,6 +399,204 @@ button,select,input{font-family:inherit;font-size:inherit}
   font-style:italic;font-size:12px;
 }
 
+/* KPI CLICKEABLE */
+.kpi-clickable{
+  cursor:pointer;
+  transition:all 0.15s ease;
+  position:relative;
+}
+.kpi-clickable:hover{
+  border-color:var(--ink);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px -4px rgba(0,0,0,.08);
+}
+.kpi-clickable .kpi-hint{
+  font-size:10px;
+  font-weight:400;
+  color:var(--ink-faint);
+  margin-left:6px;
+  font-family:'Geist Mono',monospace;
+  opacity:0;
+  transition:opacity 0.15s ease;
+}
+.kpi-clickable:hover .kpi-hint{ opacity:1 }
+
+/* MODAL */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(10,10,10,0.5);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  animation:fadeBackdrop 0.2s ease;
+}
+@keyframes fadeBackdrop{ from{opacity:0} to{opacity:1} }
+.modal-content{
+  background:var(--surface);
+  border-radius:var(--radius);
+  max-width:720px;
+  width:100%;
+  max-height:85vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 24px 48px -12px rgba(0,0,0,.25);
+  animation:modalSlide 0.25s cubic-bezier(.16,1,.3,1);
+}
+@keyframes modalSlide{ from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:none} }
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  padding:22px 26px 18px;
+  border-bottom:1px solid var(--border);
+}
+.modal-title{
+  font-size:18px;
+  font-weight:600;
+  letter-spacing:-0.02em;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.modal-title .persona-dot{ width:10px; height:10px; }
+.modal-subtitle{
+  font-size:12px;
+  color:var(--ink-faint);
+  margin-top:4px;
+  font-family:'Geist Mono',monospace;
+}
+.modal-close{
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  padding:6px;
+  border-radius:6px;
+  color:var(--ink-faint);
+  transition:all 0.15s ease;
+  display:flex;
+}
+.modal-close:hover{
+  background:var(--bg);
+  color:var(--ink);
+}
+.modal-body{
+  padding:0;
+  overflow-y:auto;
+  flex:1;
+}
+.modal-body .modal-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  padding:18px 26px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+.modal-body .modal-summary .item{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:0 12px;
+  border-right:1px solid var(--border);
+}
+.modal-body .modal-summary .item:last-child{ border-right:none }
+.modal-body .modal-summary .item:first-child{ padding-left:0 }
+.modal-body .modal-summary .label{
+  font-size:10px;
+  color:var(--ink-faint);
+  font-weight:500;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+.modal-body .modal-summary .value{
+  font-size:18px;
+  font-weight:600;
+  letter-spacing:-0.02em;
+  font-family:'Geist Mono',monospace;
+  font-variant-numeric:tabular-nums;
+}
+.modal-body .modal-summary .value.green{ color:var(--positive) }
+.modal-body .modal-summary .value.red{ color:var(--negative) }
+
+.modal-section{
+  border-bottom:1px solid var(--border);
+}
+.modal-section:last-child{ border-bottom:none }
+.modal-section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  padding:14px 26px 8px;
+  background:var(--bg);
+}
+.modal-section-head .name{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.modal-section-head .total{
+  font-family:'Geist Mono',monospace;
+  font-variant-numeric:tabular-nums;
+  font-size:13px;
+  font-weight:600;
+  color:var(--ink);
+}
+.modal-tbl{
+  width:100%;
+  border-collapse:collapse;
+}
+.modal-tbl tr{
+  border-top:1px solid var(--border);
+}
+.modal-tbl tr:first-child{ border-top:none }
+.modal-tbl td{
+  padding:9px 26px;
+  font-size:13px;
+  color:var(--ink);
+  vertical-align:top;
+}
+.modal-tbl td.cat{
+  font-weight:500;
+  width:30%;
+}
+.modal-tbl td.desc{
+  color:var(--ink-faint);
+  font-size:12.5px;
+}
+.modal-tbl td.amt{
+  text-align:right;
+  font-family:'Geist Mono',monospace;
+  font-variant-numeric:tabular-nums;
+  width:120px;
+  white-space:nowrap;
+}
+.modal-tbl td.amt.neg{ color:var(--negative) }
+.modal-tbl td.amt.pos{ color:var(--positive) }
+.modal-empty{
+  padding:40px 26px;
+  text-align:center;
+  color:var(--ink-faint);
+  font-size:13px;
+  font-style:italic;
+}
+
+@media (max-width:640px){
+  .modal-content{ max-height:92vh; max-width:100%; }
+  .modal-head{ padding:16px 18px 14px }
+  .modal-body .modal-summary{ padding:14px 18px; grid-template-columns:1fr 1fr; gap:8px; }
+  .modal-body .modal-summary .item{ border:none; padding:0 }
+  .modal-tbl td{ padding:8px 18px }
+  .modal-section-head{ padding:12px 18px 6px }
+}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;right:24px;
@@ -654,13 +852,13 @@ button,select,input{font-family:inherit;font-size:inherit}
         <span class="meta">ingresos del mes − gastos debitados de la cuenta</span>
       </div>
       <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr)">
-        <div class="kpi" style="border-left:3px solid var(--agus)">
-          <div class="kpi-label">Cuenta Agus</div>
+        <div class="kpi kpi-clickable" style="border-left:3px solid var(--agus)" onclick="openCuentaModal('Agus')">
+          <div class="kpi-label">Cuenta Agus <span class="kpi-hint">click para ver detalle →</span></div>
           <div class="kpi-value" id="kpi-saldo-agus">—</div>
           <div class="kpi-sub" id="kpi-saldo-agus-sub"></div>
         </div>
-        <div class="kpi" style="border-left:3px solid var(--sofi)">
-          <div class="kpi-label">Cuenta Sofi</div>
+        <div class="kpi kpi-clickable" style="border-left:3px solid var(--sofi)" onclick="openCuentaModal('Sofi')">
+          <div class="kpi-label">Cuenta Sofi <span class="kpi-hint">click para ver detalle →</span></div>
           <div class="kpi-value" id="kpi-saldo-sofi">—</div>
           <div class="kpi-sub" id="kpi-saldo-sofi-sub"></div>
         </div>
@@ -853,6 +1051,27 @@ button,select,input{font-family:inherit;font-size:inherit}
   </div>
 
 </main>
+
+<!-- ============= MODAL DETALLE CUENTA ============= -->
+<div id="cuenta-modal" class="modal-backdrop hidden" onclick="closeCuentaModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">
+          <span class="persona-dot" id="modal-dot"></span>
+          <span id="modal-title-text">Cuenta</span>
+        </div>
+        <div class="modal-subtitle" id="modal-subtitle">—</div>
+      </div>
+      <button class="modal-close" onclick="closeCuentaModal()" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <!-- aquí va el contenido dinámico -->
+    </div>
+  </div>
+</div>
 
 <div class="footer">v2.0 · datos locales · click descargar para sincronizar con OneDrive</div>
 
@@ -1470,6 +1689,151 @@ function renderSaldosBCGE(){
     document.getElementById('kpi-saldo-' + id + '-sub').innerHTML =
       `+${fmt(ingresos)} ingresos · −${fmt(gastosBcge + gastosTarjeta)} gastos`;
   });
+}
+
+// =============================================================
+// MODAL DETALLE CUENTA
+// =============================================================
+function openCuentaModal(person){
+  // Recopilar movimientos del mes para esa persona
+  // Para Agus: BCGE con cuenta=Agus + toda la Tarjeta
+  // Para Sofi: solo BCGE con cuenta=Sofi
+
+  // Lista combinada {section, categoria, descripcion, chf, source}
+  const items = [];
+
+  // BCGE de la cuenta
+  bcgeRows.forEach(r => {
+    if (r._state === 'deleted') return;
+    if ((r.cuenta || '').trim() !== person) return;
+    if (r.mes !== currentMonth || r.año !== currentYear) return;
+    // Buscar sección de la categoría
+    const catDef = CATEGORIES.find(c => c.name === r.categoria);
+    if (!catDef) return;
+    items.push({
+      section: catDef.section,
+      categoria: r.categoria,
+      descripcion: r.comments || '',
+      chf: r.chf,
+      source: 'BCGE'
+    });
+  });
+
+  // Tarjeta entera para Agus
+  if (person === 'Agus'){
+    tarjetaRows.forEach(r => {
+      if (r._state === 'deleted') return;
+      if (r.mes !== currentMonth || r.año !== currentYear) return;
+      const catDef = CATEGORIES.find(c => c.name === r.categoria && c.source === 'Tarjeta');
+      if (!catDef) return;
+      items.push({
+        section: catDef.section,
+        categoria: r.categoria,
+        descripcion: r.descripcion || '',
+        chf: -r.chf, // tarjeta es positiva en sheet pero como gasto en el modal
+        source: 'Tarjeta'
+      });
+    });
+  }
+
+  // Calcular totales
+  let totalIngresos = 0;
+  let totalGastos = 0;
+  items.forEach(it => {
+    if (it.chf > 0) totalIngresos += it.chf;
+    else totalGastos += Math.abs(it.chf);
+  });
+  const saldo = totalIngresos - totalGastos;
+
+  // Agrupar por sección
+  const sectionOrder = ['INGRESOS', 'FIJOS', 'TARJETA', 'ANUALES', 'OTROS', 'MENSUALIDADES', 'AHORROS'];
+  const grouped = {};
+  items.forEach(it => {
+    if (!grouped[it.section]) grouped[it.section] = [];
+    grouped[it.section].push(it);
+  });
+
+  // Setear título
+  document.getElementById('modal-title-text').textContent = 'Cuenta ' + person;
+  document.getElementById('modal-subtitle').textContent = currentMonth + ' ' + currentYear + ' · ' + items.length + ' movimientos';
+  const dot = document.getElementById('modal-dot');
+  dot.style.background = person === 'Agus' ? 'var(--agus)' : 'var(--sofi)';
+
+  // Construir body
+  let html = `
+    <div class="modal-summary">
+      <div class="item">
+        <span class="label">Ingresos</span>
+        <span class="value green">+${fmt(totalIngresos)}</span>
+      </div>
+      <div class="item">
+        <span class="label">Gastos</span>
+        <span class="value red">−${fmt(totalGastos)}</span>
+      </div>
+      <div class="item">
+        <span class="label">Saldo</span>
+        <span class="value ${saldo < 0 ? 'red' : 'green'}">${saldo < 0 ? '−' : ''}${fmt(Math.abs(saldo))}</span>
+      </div>
+    </div>
+  `;
+
+  if (items.length === 0){
+    html += `<div class="modal-empty">Sin movimientos en ${currentMonth}</div>`;
+  } else {
+    sectionOrder.forEach(sec => {
+      if (!grouped[sec]) return;
+      const secItems = grouped[sec];
+      // Ordenar por categoría dentro de la sección
+      secItems.sort((a, b) => {
+        if (a.categoria !== b.categoria) return a.categoria.localeCompare(b.categoria);
+        return Math.abs(b.chf) - Math.abs(a.chf);
+      });
+      // Total de la sección (suma de absolutos para gastos, positivo para ingresos)
+      const secTotal = secItems.reduce((s, it) => s + Math.abs(it.chf), 0);
+
+      html += `
+        <div class="modal-section">
+          <div class="modal-section-head">
+            <span class="name">${escapeHTML(sec)}</span>
+            <span class="total">${fmt(secTotal)} CHF</span>
+          </div>
+          <table class="modal-tbl"><tbody>
+      `;
+      secItems.forEach(it => {
+        const isPositive = it.chf > 0;
+        const amount = Math.abs(it.chf);
+        const sign = isPositive ? '+' : '−';
+        const cls = isPositive ? 'pos' : 'neg';
+        html += `
+          <tr>
+            <td class="cat">${escapeHTML(it.categoria)}</td>
+            <td class="desc">${escapeHTML(it.descripcion || '—')}</td>
+            <td class="amt ${cls}">${sign}${fmt(amount)}</td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table></div>`;
+    });
+  }
+
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('cuenta-modal').classList.remove('hidden');
+
+  // Cerrar con ESC
+  document.addEventListener('keydown', escCloseHandler);
+}
+
+function closeCuentaModal(event){
+  // Si vino de click, asegurar que sea en el backdrop (no en el contenido)
+  if (event && event.target && event.target.id !== 'cuenta-modal' && !event.target.classList.contains('modal-close') && !event.target.closest('.modal-close')){
+    return;
+  }
+  document.getElementById('cuenta-modal').classList.add('hidden');
+  document.removeEventListener('keydown', escCloseHandler);
+}
+
+function escCloseHandler(e){
+  if (e.key === 'Escape') closeCuentaModal();
 }
 
 function renderPersonas(){
