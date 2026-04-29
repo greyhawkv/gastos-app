@@ -1738,12 +1738,37 @@ function budgetForCategory(cat, mes){
 function isValidated(cat, mes){
   return !!budgetData[cat]?.[mes]?.validated;
 }
+
+// Plata libre / Esperado para Rev - Agus / Rev - Sofi
+// Es el mismo cálculo en los dos lugares: budget − tarjeta − varios − ½ nuestros − ½ casa + ajustes Rev no marcados como mensualidad
+// "ajustes" = Rev - Agus que NO son mensualidad oficial (ej: te transferiste 200 de adelanto sin marcarlo como mens)
+//   Esos 200 ya te los gastaste/cobraste, así que se restan del Plata libre.
+function plataLibreFor(person, mes){
+  const cat = 'Rev - ' + person;
+  const nominal = budgetForCategory(cat, mes);
+  const tarjetaPersonal = Math.abs(paidForCategory(person, mes));  // Tarjeta categoría 'Agus' o 'Sofi'
+  const variosPersonal = Math.abs(paidForCategory('Varios ' + person, mes));
+  const halfVN = Math.abs(paidForCategory('Varios nuestros', mes)) / 2;
+  const halfVC = Math.abs(paidForCategory('Varios Casa', mes)) / 2;
+  const ajusteRev = sumRevAdjustment(cat, mes); // negativo si te adelantaste (gasto)
+  return nominal - tarjetaPersonal - variosPersonal - halfVN - halfVC + ajusteRev;
+}
+
+// expectedForCategory: lógica unificada según validación.
+//   Sin validar → forecast (Plata libre para Rev, Budget para el resto)
+//   Validado → Pagado (real)
 function expectedForCategory(cat, mes){
-  // Si está validado: usa pagado. Si no: usa budget.
+  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
+    if (isValidated(cat, mes)) return paidForCategory(cat, mes);
+    return plataLibreFor(cat === 'Rev - Agus' ? 'Agus' : 'Sofi', mes);
+  }
   if (isValidated(cat, mes)) return paidForCategory(cat, mes);
   return budgetForCategory(cat, mes);
 }
+
 function pendingForCategory(cat, mes){
+  // Si validado: Pendiente = 0 (cerrado, ya no se espera más)
+  if (isValidated(cat, mes)) return 0;
   return expectedForCategory(cat, mes) - paidForCategory(cat, mes);
 }
 
@@ -2094,16 +2119,15 @@ function escCloseHandler(e){
 }
 
 function renderPersonas(){
-  // AGUS - mensualidad nominal = budget de Rev-Agus (siempre 1600 nominal)
-  // Para la plata libre, todos los consumos se tratan como deducciones positivas.
-  // Esto evita el bug visual y contable de "−−676" cuando una categoría llega con signo negativo.
+  // AGUS - desglose visible de los componentes
   const agusNom = budgetForCategory('Rev - Agus', currentMonth);
   const agusTar = Math.abs(paidForCategory('Agus', currentMonth));
   const agusVar = Math.abs(paidForCategory('Varios Agus', currentMonth));
   const halfVN = Math.abs(paidForCategory('Varios nuestros', currentMonth)) / 2;
   const halfVC = Math.abs(paidForCategory('Varios Casa', currentMonth)) / 2;
   const agusRevAjuste = sumRevAdjustment('Rev - Agus', currentMonth);
-  const agusLibre = agusNom - agusTar - agusVar - halfVN - halfVC + agusRevAjuste;
+  // Total: usa la función central para garantizar consistencia con Esperado de Mensualidades
+  const agusLibre = plataLibreFor('Agus', currentMonth);
 
   document.getElementById('agus-mens').textContent = fmt(agusNom);
   document.getElementById('agus-tarjeta').textContent = '−' + fmt(agusTar);
@@ -2119,7 +2143,7 @@ function renderPersonas(){
   const sofiTar = Math.abs(paidForCategory('Sofi', currentMonth));
   const sofiVar = Math.abs(paidForCategory('Varios Sofi', currentMonth));
   const sofiRevAjuste = sumRevAdjustment('Rev - Sofi', currentMonth);
-  const sofiLibre = sofiNom - sofiTar - sofiVar - halfVN - halfVC + sofiRevAjuste;
+  const sofiLibre = plataLibreFor('Sofi', currentMonth);
 
   document.getElementById('sofi-mens').textContent = fmt(sofiNom);
   document.getElementById('sofi-tarjeta').textContent = '−' + fmt(sofiTar);
@@ -2129,7 +2153,6 @@ function renderPersonas(){
   document.getElementById('sofi-rev-ajuste').textContent = fmtSign(sofiRevAjuste);
   document.getElementById('sofi-rev-ajuste').className = 'v ' + (sofiRevAjuste < 0 ? 'minus' : '');
   document.getElementById('sofi-libre').innerHTML = fmtCHF(sofiLibre);
-
 }
 
 function renderSectionTable(section, tblId, totalId){
