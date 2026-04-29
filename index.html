@@ -1983,25 +1983,27 @@ function renderIngresos(){
   }
   const fMes = mesSel.value;
 
-  // Categoría correspondiente
-  const cat = currentIngresoPerson === 'Agus' ? 'BCGE Agus' : 'BCGE Sofi';
-
-  // Filtrar: BCGE de esa categoría con valor POSITIVO (ingreso) y que no esté borrada
+  // Filtrar ingresos reales: todos los movimientos BCGE POSITIVOS de la cuenta/persona activa.
+  // Antes se filtraba solo por categoría BCGE Agus / BCGE Sofi, lo que dejaba afuera
+  // ingresos positivos categorizados como Rev - Agus, Rev - Sofi, devoluciones, ventas, etc.
   let rows = bcgeRows.filter(r =>
     r._state !== 'deleted' &&
-    r.categoria === cat &&
+    (r.cuenta || '').trim() === currentIngresoPerson &&
     r.año === currentYear &&
     r.chf > 0
   );
   if (fMes) rows = rows.filter(r => r.mes === fMes);
   rows.sort((a, b) => MESES.indexOf(a.mes) - MESES.indexOf(b.mes));
 
-  // Stats: si hay filtro de mes, total año = solo del mes; sino, todo el año
+  // Stats anuales: todos los ingresos positivos reales de la cuenta/persona activa.
   const allRowsForCat = bcgeRows.filter(r =>
-    r._state !== 'deleted' && r.categoria === cat && r.año === currentYear && r.chf > 0
+    r._state !== 'deleted' &&
+    (r.cuenta || '').trim() === currentIngresoPerson &&
+    r.año === currentYear &&
+    r.chf > 0
   );
   const totalAnual = allRowsForCat.reduce((s, r) => s + r.chf, 0);
-  const promedio = allRowsForCat.length ? totalAnual / 12 : 0;
+  const promedio = totalAnual / 12;
 
   document.getElementById('ingresos-total-anual').textContent = fmt(totalAnual);
   document.getElementById('ingresos-promedio').textContent = fmt(promedio);
