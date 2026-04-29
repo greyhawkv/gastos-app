@@ -878,6 +878,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div class="persona-row"><span class="l">Varios Agus</span><span class="v minus" id="agus-varios">—</span></div>
           <div class="persona-row"><span class="l">½ Varios nuestros</span><span class="v minus" id="agus-vn">—</span></div>
           <div class="persona-row"><span class="l">½ Varios casa</span><span class="v minus" id="agus-vc">—</span></div>
+          <div class="persona-row"><span class="l">Ajuste Rev - Agus</span><span class="v" id="agus-rev-ajuste">—</span></div>
           <div class="persona-row final"><span class="l">Plata libre</span><span class="v" id="agus-libre">—</span></div>
         </div>
         <div class="persona sofi">
@@ -887,6 +888,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div class="persona-row"><span class="l">Varios Sofi</span><span class="v minus" id="sofi-varios">—</span></div>
           <div class="persona-row"><span class="l">½ Varios nuestros</span><span class="v minus" id="sofi-vn">—</span></div>
           <div class="persona-row"><span class="l">½ Varios casa</span><span class="v minus" id="sofi-vc">—</span></div>
+          <div class="persona-row"><span class="l">Ajuste Rev - Sofi</span><span class="v" id="sofi-rev-ajuste">—</span></div>
           <div class="persona-row final"><span class="l">Plata libre</span><span class="v" id="sofi-libre">—</span></div>
         </div>
       </div>
@@ -1022,7 +1024,7 @@ button,select,input{font-family:inherit;font-size:inherit}
             <th class="col-wide">Descripción</th>
             <th class="col-medium">Categoría</th>
             <th class="r col-medium">Monto</th>
-            <th class="c col-narrow">Acciones</th>
+            <th class="c col-narrow">Mensualidad</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -1325,6 +1327,7 @@ function parseBCGEFromRows(arr){
       chf, categoria: String(cat).trim(),
       cuenta: r[4] || '',
       comments: r[5] || '',
+      esMensualidad: parseBoolean(r[6]),
       _state: 'clean'
     });
   }
@@ -1367,6 +1370,11 @@ function normHeader(value){
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function parseBoolean(value){
+  const v = String(value ?? '').toLowerCase().trim();
+  return value === true || value === 1 || v === '1' || v === 'true' || v === 'yes' || v === 'sí' || v === 'si';
 }
 
 function findBudgetsLayout(arr){
@@ -1465,13 +1473,11 @@ function paidForCategory(cat, mes){
   const c = CATEGORIES.find(x => x.name === cat);
   if (!c) return 0;
   if (c.source === 'COMPUTED'){
-    // Rev - Agus / Rev - Sofi en la tabla Mensualidades:
-    // usar SOLO la transferencia BCGE real, para no doble contar tarjeta/varios.
-    // La sección "Plata libre para vivir" mantiene su cálculo separado más abajo.
-    if (cat === 'Rev - Agus'){
-      return sumBCGE('Rev - Agus', mes) * -1;  // gastos negativos → positivos
-    } else if (cat === 'Rev - Sofi'){
-      return sumBCGE('Rev - Sofi', mes) * -1;
+    // Mensualidades: cuenta solo las filas marcadas explícitamente como "Es mensualidad".
+    // Esto permite que Rev - Agus / Rev - Sofi tenga otros ajustes personales
+    // sin alterar el control de transferencia mensual.
+    if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
+      return sumMonthlyTransfers(cat, mes);
     }
     return 0;
   }
@@ -1487,6 +1493,16 @@ function paidForCategory(cat, mes){
 function sumBCGE(cat, mes){
   return bcgeRows
     .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
+    .reduce((s, r) => s + r.chf, 0);
+}
+function sumMonthlyTransfers(cat, mes){
+  return bcgeRows
+    .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && r.esMensualidad && r.chf < 0)
+    .reduce((s, r) => s + Math.abs(r.chf), 0);
+}
+function sumRevAdjustment(cat, mes){
+  return bcgeRows
+    .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad)
     .reduce((s, r) => s + r.chf, 0);
 }
 function sumTarjeta(cat, mes){
@@ -1851,26 +1867,32 @@ function renderPersonas(){
   const agusVar = Math.abs(paidForCategory('Varios Agus', currentMonth));
   const halfVN = Math.abs(paidForCategory('Varios nuestros', currentMonth)) / 2;
   const halfVC = Math.abs(paidForCategory('Varios Casa', currentMonth)) / 2;
-  const agusLibre = agusNom - agusTar - agusVar - halfVN - halfVC;
+  const agusRevAjuste = sumRevAdjustment('Rev - Agus', currentMonth);
+  const agusLibre = agusNom - agusTar - agusVar - halfVN - halfVC + agusRevAjuste;
 
   document.getElementById('agus-mens').textContent = fmt(agusNom);
   document.getElementById('agus-tarjeta').textContent = '−' + fmt(agusTar);
   document.getElementById('agus-varios').textContent = '−' + fmt(agusVar);
   document.getElementById('agus-vn').textContent = '−' + fmt(halfVN);
   document.getElementById('agus-vc').textContent = '−' + fmt(halfVC);
+  document.getElementById('agus-rev-ajuste').textContent = fmtSign(agusRevAjuste);
+  document.getElementById('agus-rev-ajuste').className = 'v ' + (agusRevAjuste < 0 ? 'minus' : '');
   document.getElementById('agus-libre').innerHTML = fmtCHF(agusLibre);
 
   // SOFI
   const sofiNom = budgetForCategory('Rev - Sofi', currentMonth);
   const sofiTar = Math.abs(paidForCategory('Sofi', currentMonth));
   const sofiVar = Math.abs(paidForCategory('Varios Sofi', currentMonth));
-  const sofiLibre = sofiNom - sofiTar - sofiVar - halfVN - halfVC;
+  const sofiRevAjuste = sumRevAdjustment('Rev - Sofi', currentMonth);
+  const sofiLibre = sofiNom - sofiTar - sofiVar - halfVN - halfVC + sofiRevAjuste;
 
   document.getElementById('sofi-mens').textContent = fmt(sofiNom);
   document.getElementById('sofi-tarjeta').textContent = '−' + fmt(sofiTar);
   document.getElementById('sofi-varios').textContent = '−' + fmt(sofiVar);
   document.getElementById('sofi-vn').textContent = '−' + fmt(halfVN);
   document.getElementById('sofi-vc').textContent = '−' + fmt(halfVC);
+  document.getElementById('sofi-rev-ajuste').textContent = fmtSign(sofiRevAjuste);
+  document.getElementById('sofi-rev-ajuste').className = 'v ' + (sofiRevAjuste < 0 ? 'minus' : '');
   document.getElementById('sofi-libre').innerHTML = fmtCHF(sofiLibre);
 
 }
@@ -2068,6 +2090,7 @@ function addIngreso(){
     categoria: cat,
     cuenta: currentIngresoPerson,
     comments: '',
+    esMensualidad: false,
     _state: 'new'
   };
   bcgeRows.push(newRow);
@@ -2255,9 +2278,7 @@ function renderGastos(){
       <td><select class="gasto-cat" data-id="${r.id}" data-source="${r.source}">${catOptionsHtml(r.categoria, r.source)}</select></td>
       <td><input type="number" class="gasto-chf num" data-id="${r.id}" data-source="${r.source}" value="${r.source === 'BCGE' ? Math.abs(r.chf) : r.chf}" step="0.01"></td>
       <td class="center">
-        <button class="row-action-btn" title="Borrar" onclick="deleteRow('${tableType}', ${r.id})">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-        </button>
+        <input type="checkbox" class="gasto-mensualidad" data-id="${r.id}" data-source="${r.source}" ${r.esMensualidad ? 'checked' : ''} ${r.source !== 'BCGE' ? 'disabled' : ''} title="Es mensualidad">
       </td>
     `;
     tbody.appendChild(tr);
@@ -2280,6 +2301,9 @@ function renderGastos(){
     if (src === 'bcge' && val > 0) val = -val;
     editRowField(src, +e.target.dataset.id, 'chf', val);
   });
+  tbody.querySelectorAll('.gasto-mensualidad').forEach(el => el.onchange = e => {
+    editRowField('bcge', +e.target.dataset.id, 'esMensualidad', e.target.checked);
+  });
 }
 
 function addGasto(){
@@ -2294,6 +2318,7 @@ function addGasto(){
     categoria: defaultCat.name,
     cuenta: defaultCuenta,
     comments: '',
+    esMensualidad: false,
     _state: 'new'
   };
   bcgeRows.push(newRow);
@@ -2340,6 +2365,7 @@ function moveRowToOtherSource(id, fromSource, toSource){
     descripcion: oldRow.descripcion || oldRow.comments || '',
     comments: oldRow.comments || '',
     cuenta: oldRow.cuenta || '',
+    esMensualidad: toSource === 'BCGE' ? !!oldRow.esMensualidad : false,
     _state: 'new'
   };
   toArr.push(newRow);
@@ -2599,9 +2625,9 @@ async function saveToSheets(){
 
   try {
     // ========= 1. Preparar BCGE =========
-    const bcgeData = [['Año pago', 'Mes pago', 'CHF', 'Categoria', 'BCGE cuenta', 'Comments', 'Colonne1']];
+    const bcgeData = [['Año pago', 'Mes pago', 'CHF', 'Categoria', 'BCGE cuenta', 'Comments', 'Es mensualidad']];
     bcgeRows.filter(r => r._state !== 'deleted').forEach(r => {
-      bcgeData.push([r.año || '', r.mes, r.chf, r.categoria, r.cuenta || '', r.comments || '', '']);
+      bcgeData.push([r.año || '', r.mes, r.chf, r.categoria, r.cuenta || '', r.comments || '', r.esMensualidad ? 1 : 0]);
     });
 
     // ========= 2. Preparar Tarjeta =========
