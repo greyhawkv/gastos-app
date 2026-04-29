@@ -1533,28 +1533,17 @@ function plataLibreFor(person, mes){
   return nominal - tarjetaPersonal - variosPersonal - halfVN - halfVC + ajusteRev;
 }
 
-// expectedForCategory devuelve el valor que IMPACTA EL BALANCE.
-// Para mostrar el "Esperado" en la UI, se usa expectedDisplayForCategory (puede diferir solo en Rev validadas).
+// expectedForCategory devuelve el valor que se muestra Y que impacta el balance.
+// Lógica unificada: si validado → Pagado (real); si no → forecast.
+//   Para categorías normales, forecast = Budget.
+//   Para Rev-Agus / Rev-Sofi, forecast = Plata libre (= Budget - tarjeta - varios - ½ nuestros - ½ casa + ajustes Rev no-mens).
 function expectedForCategory(cat, mes){
-  // Lógica unificada: si validado → Pagado (real); si no → forecast.
-  //   Para categorías normales, forecast = Budget.
-  //   Para Rev-Agus / Rev-Sofi, forecast = Plata libre (= Budget - tarjeta - varios - ½ nuestros - ½ casa + ajustes Rev no-mens).
   if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
     if (isValidated(cat, mes)) return paidForCategory(cat, mes);
     return plataLibreFor(cat === 'Rev - Agus' ? 'Agus' : 'Sofi', mes);
   }
   if (isValidated(cat, mes)) return paidForCategory(cat, mes);
   return budgetForCategory(cat, mes);
-}
-
-// expectedDisplayForCategory devuelve el valor que se MUESTRA en la columna "Esperado".
-// Difiere de expectedForCategory solo para Rev validadas: se sigue mostrando la Plata libre como info,
-// aunque el balance use Pagado.
-function expectedDisplayForCategory(cat, mes){
-  if ((cat === 'Rev - Agus' || cat === 'Rev - Sofi') && isValidated(cat, mes)){
-    return plataLibreFor(cat === 'Rev - Agus' ? 'Agus' : 'Sofi', mes);
-  }
-  return expectedForCategory(cat, mes);
 }
 
 function pendingForCategory(cat, mes){
@@ -1960,18 +1949,18 @@ function renderSectionTable(section, tblId, totalId){
   let totExp = 0, totPaid = 0;
 
   filtered.forEach(c => {
-    const expectedDisplay = expectedDisplayForCategory(c.name, currentMonth);
+    const expected = expectedForCategory(c.name, currentMonth);
     const paid = paidForCategory(c.name, currentMonth);
     const pending = pendingForCategory(c.name, currentMonth);
     const validated = isValidated(c.name, currentMonth);
-    totExp += expectedDisplay;
+    totExp += expected;
     totPaid += paid;
 
     const tr = document.createElement('tr');
     if (validated) tr.classList.add('validated');
     tr.innerHTML = `
       <td class="label">${escapeHTML(c.name)}</td>
-      <td class="num">${fmt(expectedDisplay)}</td>
+      <td class="num">${fmt(expected)}</td>
       <td class="num ${paid > 0 ? '' : 'ghost'}">${paid > 0 ? fmt(paid) : '—'}</td>
       <td class="num ${Math.abs(pending) > 1 ? 'dim' : 'ghost'}">${Math.abs(pending) > 1 ? fmt(pending) : '—'}</td>
       <td class="center"><div class="check-cell"><span class="check-toggle ${validated?'checked':''}" data-cat="${escapeHTML(c.name)}"></span></div></td>
