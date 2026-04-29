@@ -1518,12 +1518,22 @@ function isValidated(cat, mes){
   return !!budgetData[cat]?.[mes]?.validated;
 }
 function expectedForCategory(cat, mes){
-  // Si está validado: usa pagado. Si no: usa budget.
+  // Mensualidades: el esperado se ajusta por los movimientos Rev que NO son mensualidad.
+  // Ejemplo: si la mensualidad nominal es 1600 y hay +609 de ajustes Rev - Agus,
+  // entonces lo esperado a transferir es 991. Los movimientos marcados como mensualidad
+  // cuentan como pagado, no como ajuste.
+  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
+    return budgetForCategory(cat, mes) - sumRevAdjustment(cat, mes);
+  }
+
+  // Para el resto de categorías, se mantiene la lógica original:
+  // si está validado, usar pagado; si no, usar budget.
   if (isValidated(cat, mes)) return paidForCategory(cat, mes);
   return budgetForCategory(cat, mes);
 }
 function pendingForCategory(cat, mes){
-  return expectedForCategory(cat, mes) - paidForCategory(cat, mes);
+  const pending = expectedForCategory(cat, mes) - paidForCategory(cat, mes);
+  return Math.abs(pending) > 1 ? pending : 0;
 }
 
 function totalBySection(section, mes){
@@ -1900,11 +1910,12 @@ function renderPersonas(){
 function renderSectionTable(section, tblId, totalId){
   const tbl = document.getElementById(tblId);
   const cats = CATEGORIES.filter(c => c.section === section);
-  // Filtrar las que no tienen budget ni paid
+  // Filtrar las que tienen algún valor relevante (esperado ajustado, pagado o budget).
   const filtered = cats.filter(c => {
     const b = budgetForCategory(c.name, currentMonth);
+    const e = expectedForCategory(c.name, currentMonth);
     const p = paidForCategory(c.name, currentMonth);
-    return b !== 0 || p !== 0;
+    return b !== 0 || e !== 0 || p !== 0;
   });
 
   tbl.innerHTML = `<thead><tr>
