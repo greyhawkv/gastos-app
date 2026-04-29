@@ -951,6 +951,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <tr>
             <th class="col-narrow">Mes</th>
             <th class="col-wide">Descripción / Comentario</th>
+            <th class="col-medium">Categoría</th>
             <th class="r col-medium">Monto</th>
             <th class="c col-narrow">Acciones</th>
           </tr>
@@ -1581,21 +1582,26 @@ function renderMonthTabs(){
 
 function renderDashboard(){
   // KPIs
-  // Ingresos: usar pagado real si existe; si no existe, usar budget.
-  // Esto evita que el KPI muestre budget cuando ya hay ingresos cargados en BCGE.
-  const ingresos = CATEGORIES
+  // Ingresos: usar ingresos reales positivos de BCGE si existen; si no, usar budget.
+  // Esto mantiene el KPI alineado con el detalle de cuentas y la pestaña Ingresos.
+  const ingresosReal = bcgeRows
+    .filter(r => r._state !== 'deleted'
+      && r.año === currentYear
+      && r.mes === currentMonth
+      && r.chf > 0
+      && ['Agus', 'Sofi'].includes((r.cuenta || '').trim()))
+    .reduce((s, r) => s + r.chf, 0);
+  const ingresosBudgetTotal = CATEGORIES
     .filter(c => c.section === 'INGRESOS')
-    .reduce((s, c) => {
-      const paid = paidForCategory(c.name, currentMonth);
-      return s + (paid !== 0 ? paid : budgetForCategory(c.name, currentMonth));
-    }, 0);
+    .reduce((s, c) => s + budgetForCategory(c.name, currentMonth), 0);
+  const ingresos = ingresosReal !== 0 ? ingresosReal : ingresosBudgetTotal;
   const gastos = totalBySection('FIJOS', currentMonth) + totalBySection('TARJETA', currentMonth) +
                  totalBySection('ANUALES', currentMonth) + totalBySection('OTROS', currentMonth);
   const mens = totalBySection('MENSUALIDADES', currentMonth);
   const ahorros = totalBySection('AHORROS', currentMonth);
   const balance = ingresos - gastos - mens - ahorros;
 
-  const ingresosBudget = CATEGORIES.filter(c=>c.section==='INGRESOS').reduce((s,c)=>s+budgetForCategory(c.name, currentMonth), 0);
+  const ingresosBudget = ingresosBudgetTotal;
   const gastosBudget = CATEGORIES.filter(c=>['FIJOS','TARJETA','ANUALES','OTROS'].includes(c.section)).reduce((s,c)=>s+budgetForCategory(c.name, currentMonth), 0);
 
   document.getElementById('kpi-ingresos').innerHTML = fmtCHF(ingresos);
@@ -2016,7 +2022,7 @@ function renderIngresos(){
   if (!rows.length){
     const tr = document.createElement('tr');
     const msg = fMes ? `Sin ingresos cargados para ${currentIngresoPerson} en ${fMes}` : `Sin ingresos cargados para ${currentIngresoPerson}`;
-    tr.innerHTML = `<td colspan="4" style="text-align:center;color:var(--ink-faint);padding:32px;font-style:italic;font-size:13px">${msg}</td>`;
+    tr.innerHTML = `<td colspan="5" style="text-align:center;color:var(--ink-faint);padding:32px;font-style:italic;font-size:13px">${msg}</td>`;
     tbody.appendChild(tr);
     return;
   }
@@ -2030,6 +2036,7 @@ function renderIngresos(){
     tr.innerHTML = `
       <td><select class="ingreso-mes" data-id="${r.id}">${monthOptions(r.mes)}</select></td>
       <td><input type="text" class="ingreso-comments" data-id="${r.id}" value="${escapeHTML(r.comments || '')}" placeholder="Sueldo, bonus, reembolso..."></td>
+      <td><select class="ingreso-categoria" data-id="${r.id}">${ingresoCategoryOptions(r.categoria)}</select></td>
       <td><input type="number" class="ingreso-chf num" data-id="${r.id}" value="${r.chf}" step="0.01"></td>
       <td class="center">
         <button class="row-action-btn" title="Borrar" onclick="deleteRow('bcge', ${r.id})">
@@ -2042,6 +2049,7 @@ function renderIngresos(){
 
   tbody.querySelectorAll('.ingreso-mes').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'mes', e.target.value));
   tbody.querySelectorAll('.ingreso-comments').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'comments', e.target.value));
+  tbody.querySelectorAll('.ingreso-categoria').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'categoria', e.target.value));
   tbody.querySelectorAll('.ingreso-chf').forEach(el => el.onchange = e => {
     let v = parseFloat(e.target.value) || 0;
     if (v < 0) v = Math.abs(v); // ingresos siempre positivos
@@ -2068,6 +2076,17 @@ function addIngreso(){
   renderIngresos();
   renderDashboard();
   renderForecast();
+}
+
+
+function ingresoCategoryOptions(selected){
+  // Categorías permitidas para ingresos positivos en BCGE.
+  // Incluye categorías de ingresos formales y mensualidades/reembolsos positivos que pueden aparecer en cuenta.
+  const opts = CATEGORIES
+    .filter(c => c.source === 'BCGE' || c.source === 'COMPUTED')
+    .map(c => c.name);
+  if (selected && !opts.includes(selected)) opts.unshift(selected);
+  return [...new Set(opts)].map(c => `<option value="${escapeHTML(c)}" ${c === selected ? 'selected' : ''}>${escapeHTML(c)}</option>`).join('');
 }
 
 function monthOptions(selected){
