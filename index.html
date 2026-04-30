@@ -715,6 +715,89 @@ button,select,input{font-family:inherit;font-size:inherit}
   vertical-align:middle;
 }
 
+/* TOOLTIP en celdas Pagado */
+.has-tooltip{
+  cursor:help;
+  position:relative;
+  text-decoration:underline;
+  text-decoration-style:dotted;
+  text-decoration-color:var(--ink-faint);
+  text-underline-offset:3px;
+}
+#hover-tooltip{
+  position:fixed;
+  z-index:5000;
+  background:var(--ink);
+  color:#fff;
+  border-radius:8px;
+  padding:8px 0;
+  font-size:11px;
+  line-height:1.4;
+  pointer-events:none;
+  box-shadow:0 8px 24px -6px rgba(0,0,0,.3);
+  min-width:240px;
+  max-width:340px;
+  display:none;
+  font-family:'Geist',sans-serif;
+}
+#hover-tooltip.visible{display:block}
+#hover-tooltip .tt-header{
+  padding:0 12px 6px;
+  margin-bottom:4px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  font-weight:600;
+  font-size:11px;
+  letter-spacing:0.02em;
+}
+#hover-tooltip .tt-body{padding:0 12px}
+#hover-tooltip .tt-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:3px 0;
+  font-size:11px;
+}
+#hover-tooltip .tt-label{
+  flex:1;
+  color:rgba(255,255,255,.85);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#hover-tooltip .tt-amount{
+  font-family:'Geist Mono',monospace;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+}
+#hover-tooltip .tt-badge{
+  font-size:9px;
+  padding:1px 5px;
+  border-radius:99px;
+  font-weight:600;
+  letter-spacing:0.02em;
+  text-transform:uppercase;
+}
+#hover-tooltip .tt-badge.mens{background:#10b981;color:#fff}
+#hover-tooltip .tt-badge.adj{background:#f59e0b;color:#1f1f1f}
+#hover-tooltip .tt-total{
+  display:flex;
+  justify-content:space-between;
+  padding:6px 12px 0;
+  margin-top:4px;
+  border-top:1px solid rgba(255,255,255,.1);
+  font-weight:600;
+  font-size:11px;
+}
+#hover-tooltip .tt-total span:last-child{
+  font-family:'Geist Mono',monospace;
+  font-variant-numeric:tabular-nums;
+}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;right:24px;
@@ -1276,6 +1359,7 @@ button,select,input{font-family:inherit;font-size:inherit}
 </div>
 
 <div id="toast" style="display:none"></div>
+<div id="hover-tooltip"></div>
 
 <script>
 // =============================================================
@@ -2230,8 +2314,63 @@ function renderPersonas(){
   document.getElementById('sofi-libre').innerHTML = fmtCHF(sofiLibre);
 }
 
-function renderSectionTable(section, tblId, totalId){
-  const tbl = document.getElementById(tblId);
+// Devuelve HTML con el desglose de movimientos que suman al "Pagado" de una categoría/mes.
+// Se usa como tooltip en hover de la celda Pagado.
+function buildPagadoTooltip(cat, mes){
+  const c = CATEGORIES.find(x => x.name === cat);
+  if (!c) return '';
+  const items = []; // {label, amount, isMens?}
+
+  if (c.source === 'COMPUTED'){
+    // Rev - Agus / Rev - Sofi: incluye transferencias mens + ajustes
+    if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
+      // Transferencias mensualidad (negativas marcadas mens)
+      bcgeRows
+        .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && r.esMensualidad && r.chf < 0)
+        .forEach(r => items.push({
+          label: (r.comments || '').slice(0, 38) || 'mensualidad',
+          amount: Math.abs(r.chf),
+          isMens: true
+        }));
+      // Ajustes (no marcados mens) - se muestran negativos como "salida"
+      bcgeRows
+        .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad)
+        .forEach(r => items.push({
+          label: (r.comments || '').slice(0, 38) || 'ajuste',
+          amount: -r.chf, // si chf=-200 (gasto), ajuste positivo en cash
+          isAdjust: true
+        }));
+    }
+  } else if (c.source === 'BCGE'){
+    bcgeRows
+      .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
+      .forEach(r => items.push({
+        label: (r.comments || '').slice(0, 38) || cat,
+        amount: r.chf * c.sign
+      }));
+  } else if (c.source === 'Tarjeta'){
+    tarjetaRows
+      .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
+      .forEach(r => items.push({
+        label: (r.descripcion || '').slice(0, 38) || cat,
+        amount: r.chf * c.sign
+      }));
+  }
+
+  if (!items.length) return '';
+
+  // Construir HTML
+  const total = items.reduce((s, i) => s + i.amount, 0);
+  const rows = items.map(i => {
+    let badge = '';
+    if (i.isMens) badge = '<span class="tt-badge mens">mens</span>';
+    else if (i.isAdjust) badge = '<span class="tt-badge adj">ajuste</span>';
+    return `<div class="tt-row"><span class="tt-label">${escapeHTML(i.label)}${badge}</span><span class="tt-amount">${fmt(i.amount)}</span></div>`;
+  }).join('');
+  return `<div class="tt-header">${escapeHTML(cat)}</div><div class="tt-body">${rows}</div><div class="tt-total"><span>Total</span><span>${fmt(total)}</span></div>`;
+}
+
+function renderSectionTable(section, tblId, totalId){  const tbl = document.getElementById(tblId);
   const cats = CATEGORIES.filter(c => c.section === section);
   // Filtrar las que no tienen budget ni paid
   const filtered = cats.filter(c => {
@@ -2265,12 +2404,15 @@ function renderSectionTable(section, tblId, totalId){
     totExp += expected;
     totPaid += paid;
 
+    // Construir desglose para tooltip (los movimientos que suman al "Pagado")
+    const tooltipHtml = paid > 0 ? buildPagadoTooltip(c.name, currentMonth) : '';
+
     const tr = document.createElement('tr');
     if (validated) tr.classList.add('validated');
     tr.innerHTML = `
       <td class="label">${escapeHTML(c.name)}</td>
       <td class="num">${fmt(expected)}</td>
-      <td class="num ${paid > 0 ? '' : 'ghost'}">${paid > 0 ? fmt(paid) : '—'}</td>
+      <td class="num ${paid > 0 ? 'has-tooltip' : 'ghost'}" ${tooltipHtml ? `data-tooltip='${tooltipHtml.replace(/'/g, "&#39;")}'` : ''}>${paid > 0 ? fmt(paid) : '—'}</td>
       <td class="num ${Math.abs(pending) > 1 ? 'dim' : 'ghost'}">${Math.abs(pending) > 1 ? fmt(pending) : '—'}</td>
       <td class="center"><div class="check-cell"><span class="check-toggle ${validated?'checked':''}" data-cat="${escapeHTML(c.name)}"></span></div></td>
     `;
@@ -3401,6 +3543,57 @@ function colNumToLetter(n){
   }
   return s;
 }
+
+// =============================================================
+// TOOLTIP HOVER en celdas con data-tooltip
+// =============================================================
+(function setupTooltips(){
+  const tt = document.getElementById('hover-tooltip');
+  if (!tt) return;
+
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-tooltip]');
+    if (!el) return;
+    const html = el.getAttribute('data-tooltip');
+    if (!html) return;
+    tt.innerHTML = html;
+    tt.classList.add('visible');
+    positionTooltip(el);
+  });
+
+  document.addEventListener('mouseout', e => {
+    const el = e.target.closest('[data-tooltip]');
+    if (!el) return;
+    // Solo ocultar si salimos completamente
+    if (e.relatedTarget && el.contains(e.relatedTarget)) return;
+    tt.classList.remove('visible');
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!tt.classList.contains('visible')) return;
+    const el = e.target.closest('[data-tooltip]');
+    if (el) positionTooltip(el);
+  });
+
+  function positionTooltip(el){
+    const rect = el.getBoundingClientRect();
+    const ttRect = tt.getBoundingClientRect();
+    // Por defecto: centrado horizontalmente sobre el elemento
+    let left = rect.left + rect.width/2 - ttRect.width/2;
+    let top = rect.top - ttRect.height - 8;
+    // Si no entra arriba, mostrar abajo
+    if (top < 8){
+      top = rect.bottom + 8;
+    }
+    // Clampar horizontalmente
+    if (left < 8) left = 8;
+    if (left + ttRect.width > window.innerWidth - 8){
+      left = window.innerWidth - ttRect.width - 8;
+    }
+    tt.style.left = left + 'px';
+    tt.style.top = top + 'px';
+  }
+})();
 
 function showToast(msg, type){
   const t = document.getElementById('toast');
