@@ -2610,7 +2610,8 @@ function updateAddModalCategorias(){
     // Ingresos: por convención, categoría = BCGE Agus / BCGE Sofi (cualquier positivo cuenta como ingreso, pero por defecto sugerimos esta)
     cats = CATEGORIES.filter(c => c.section === 'INGRESOS').map(c => c.name);
   } else if (fuente === 'BCGE'){
-    cats = CATEGORIES.filter(c => c.source === 'BCGE' && c.section !== 'INGRESOS').map(c => c.name);
+    // Gastos BCGE: incluye categorías BCGE + COMPUTED (Rev - Agus, Rev - Sofi son COMPUTED pero se cargan en BCGE)
+    cats = CATEGORIES.filter(c => c.section !== 'INGRESOS' && (c.source === 'BCGE' || c.source === 'COMPUTED')).map(c => c.name);
   } else {
     cats = CATEGORIES.filter(c => c.source === 'Tarjeta').map(c => c.name);
   }
