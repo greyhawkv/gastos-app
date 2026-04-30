@@ -702,6 +702,19 @@ button,select,input{font-family:inherit;font-size:inherit}
   color:var(--ink-faint);font-size:12px;font-style:italic;
 }
 
+.transfer-badge{
+  display:inline-block;
+  padding:2px 8px;
+  margin-right:6px;
+  background:#fef3c7;
+  color:#92400e;
+  font-size:10px;
+  font-weight:600;
+  border-radius:99px;
+  letter-spacing:0.02em;
+  vertical-align:middle;
+}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;right:24px;
@@ -1226,6 +1239,13 @@ button,select,input{font-family:inherit;font-size:inherit}
             <option value="Sofi">Sofi</option>
           </select>
         </div>
+        <div class="form-row" id="add-transfer-destino-row" style="display:none">
+          <label>Hacia cuenta</label>
+          <select id="add-cuenta-destino">
+            <option value="Agus">Agus</option>
+            <option value="Sofi">Sofi</option>
+          </select>
+        </div>
         <div class="form-row">
           <label>Categoría</label>
           <select id="add-categoria"></select>
@@ -1317,6 +1337,10 @@ const CATEGORIES = [
   {section:'AHORROS', name:'Rev - CDP', source:'BCGE', sign:-1},
   {section:'AHORROS', name:'Rev - Impuestos', source:'BCGE', sign:-1},
   {section:'AHORROS', name:'Rev - Vacaciones Sofi', source:'BCGE', sign:-1},
+  // TRANSFERENCIAS: categoría neutra. No afecta el balance del mes (no es ingreso ni gasto).
+  // Se usa para registrar movimientos entre cuentas Agus↔Sofi.
+  // Cuando se crea desde la app, se generan 2 filas opuestas (gasto en origen, ingreso en destino).
+  {section:'TRANSFERENCIAS', name:'Transferencia interna', source:'BCGE', sign:0},
 ];
 
 // =============================================================
@@ -1695,11 +1719,18 @@ function paidForCategory(cat, mes){
   const c = CATEGORIES.find(x => x.name === cat);
   if (!c) return 0;
   if (c.source === 'COMPUTED'){
-    // Mensualidades: cuenta solo las filas marcadas explícitamente como "Es mensualidad".
-    // Esto permite que Rev - Agus / Rev - Sofi tenga otros ajustes personales
-    // sin alterar el control de transferencia mensual.
+    // Mensualidades: para que el balance presupuestario coincida con el cash real,
+    // contamos TODO lo que salió de la cuenta cargado a Rev-Agus/Rev-Sofi en el mes:
+    //   - transferencias mensualidad (oficiales, marcadas mens)
+    //   - ajustes (no marcadas mens, ej: te transferiste 200 de adelanto sin marcar)
+    // El cuadro Mensualidades muestra esto como "Pagado" (lo que cash sintió).
     if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-      return sumMonthlyTransfers(cat, mes);
+      const mensTransfers = sumMonthlyTransfers(cat, mes);  // negativos marcados mens, abs
+      const ajustes = sumRevAdjustment(cat, mes);  // suma con signo (positivos+negativos no-mens)
+      // Para el "Pagado" cash: convertimos los ajustes a "salida de plata" si son negativos
+      // y los agregamos como salidas (abs). Si son positivos (te entró plata vía Rev), los restamos.
+      const ajustesNetos = -ajustes;  // si ajustes=-200 (te adelantaste), ajustesNetos=+200 (cash sintió 200 de salida)
+      return mensTransfers + ajustesNetos;
     }
     return 0;
   }
@@ -2446,11 +2477,17 @@ function renderGastos(){
 
   // Construir lista unificada
   // BCGE: incluir solo NEGATIVOS (gastos). Positivos son ingresos y van a otra tab.
+  // EXCEPCIÓN: 'Transferencia interna' - mostramos AMBAS filas (origen negativa, destino positiva)
   const all = [];
   bcgeRows.forEach(r => {
     if (r._state === 'deleted') return;
-    if (r.chf > 0) return; // ingreso, no gasto
     if (r.categoria === 'BCGE Agus' || r.categoria === 'BCGE Sofi') return;
+    if (r.categoria === 'Transferencia interna'){
+      // Mostramos ambas filas (origen y destino) con badge
+      all.push({...r, source: 'BCGE', isTransfer: true});
+      return;
+    }
+    if (r.chf > 0) return; // ingreso normal, no gasto
     all.push({...r, source: 'BCGE'});
   });
   tarjetaRows.forEach(r => {
@@ -2484,8 +2521,12 @@ function renderGastos(){
   });
 
   // Stats
+  // Para transferencias internas: las filas POSITIVAS no son gastos (son los recibidos), no las contamos.
+  // Las filas NEGATIVAS de transferencia tampoco son gastos reales (se compensan), pero las dejamos en el conteo
+  // visual de la lista para que se vean. Los totales solo cuentan gastos reales.
   let totBcge = 0, totTar = 0;
   filtered.forEach(r => {
+    if (r.isTransfer) return; // transferencias internas no son gastos reales
     if (r.source === 'BCGE') totBcge += Math.abs(r.chf);
     else totTar += r.chf;
   });
@@ -2542,7 +2583,10 @@ function renderGastos(){
       </td>
       <td>${cuentaCell}</td>
       <td><select class="gasto-mes" data-id="${r.id}" data-source="${r.source}">${monthOptions(r.mes)}</select></td>
-      <td><input type="text" class="gasto-desc" data-id="${r.id}" data-source="${r.source}" value="${escapeHTML(descField)}" placeholder="Descripción..."></td>
+      <td>
+        ${r.isTransfer ? `<span class="transfer-badge">${r.chf > 0 ? '↓ recibido' : '↑ enviado'}</span>` : ''}
+        <input type="text" class="gasto-desc" data-id="${r.id}" data-source="${r.source}" value="${escapeHTML(descField)}" placeholder="Descripción...">
+      </td>
       <td><select class="gasto-cat" data-id="${r.id}" data-source="${r.source}">${catOptionsHtml(r.categoria, r.source)}</select></td>
       <td><input type="number" class="gasto-chf num" data-id="${r.id}" data-source="${r.source}" value="${r.source === 'BCGE' ? Math.abs(r.chf) : r.chf}" step="0.01"></td>
       <td class="center">
@@ -2623,7 +2667,10 @@ function openAddModal(context){
   fuenteSel.onchange = updateAddModalCategorias;
 
   // Cuenta visible: en Tarjeta no aplica (siempre Agus)
-  cuentaSel.onchange = updateAddModalCategorias;
+  cuentaSel.onchange = () => {
+    syncTransferDestino();
+    updateAddModalCategorias();
+  };
 
   updateAddModalCategorias();
 
@@ -2674,12 +2721,35 @@ function updateAddModalCategorias(){
 function updateAddModalMensualidadVisibility(){
   const cat = document.getElementById('add-categoria').value;
   const mensRow = document.getElementById('add-mensualidad-row');
+  const transferRow = document.getElementById('add-transfer-destino-row');
+  const cuentaLabel = document.querySelector('#add-cuenta-row label');
+
+  // Toggle "Es mensualidad" - solo Rev
   if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
     mensRow.style.display = '';
   } else {
     mensRow.style.display = 'none';
     document.getElementById('add-mensualidad').checked = false;
   }
+
+  // Cuenta destino - solo Transferencia interna
+  if (cat === 'Transferencia interna'){
+    if (transferRow) transferRow.style.display = '';
+    if (cuentaLabel) cuentaLabel.textContent = 'Desde cuenta';
+    // Forzar destino distinto al origen
+    syncTransferDestino();
+  } else {
+    if (transferRow) transferRow.style.display = 'none';
+    if (cuentaLabel) cuentaLabel.textContent = 'Cuenta';
+  }
+}
+
+function syncTransferDestino(){
+  const origen = document.getElementById('add-cuenta').value;
+  const destinoSel = document.getElementById('add-cuenta-destino');
+  if (!destinoSel) return;
+  // Destino es siempre la otra cuenta
+  destinoSel.value = origen === 'Agus' ? 'Sofi' : 'Agus';
 }
 
 function closeAddModal(event){
@@ -2710,6 +2780,51 @@ function submitAddForm(){
   }
   if (!categoria){
     showToast('Elegí una categoría', 'error');
+    return;
+  }
+
+  // CASO ESPECIAL: Transferencia interna entre cuentas
+  // Se generan 2 filas opuestas automáticamente: gasto en origen, ingreso en destino
+  if (categoria === 'Transferencia interna'){
+    const destino = document.getElementById('add-cuenta-destino').value;
+    if (destino === cuenta){
+      showToast('La cuenta origen y destino deben ser distintas', 'error');
+      return;
+    }
+    const monto_abs = Math.abs(monto);
+    const desc = descripcion || `transfer ${cuenta} → ${destino}`;
+    // Fila 1: gasto en cuenta origen
+    bcgeRows.push({
+      id: nextRowId++,
+      año: currentYear,
+      mes,
+      chf: -monto_abs,
+      categoria: 'Transferencia interna',
+      cuenta,
+      comments: desc,
+      esMensualidad: false,
+      _state: 'new'
+    });
+    // Fila 2: ingreso en cuenta destino
+    bcgeRows.push({
+      id: nextRowId++,
+      año: currentYear,
+      mes,
+      chf: monto_abs,
+      categoria: 'Transferencia interna',
+      cuenta: destino,
+      comments: desc,
+      esMensualidad: false,
+      _state: 'new'
+    });
+    dirtyChanges += 2;
+    updatePendingBanner();
+    renderIngresos();
+    renderGastos();
+    renderDashboard();
+    renderForecast();
+    closeAddModal();
+    showToast(`Transferencia ${cuenta}→${destino} registrada (2 filas)`, 'success');
     return;
   }
 
