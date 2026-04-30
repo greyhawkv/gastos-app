@@ -1933,6 +1933,21 @@ function renderSaldosBCGE(){
   //   Ingresos = positivos en BCGE con cuenta=persona (cualquier categoría: salario, twint, devolución, etc.)
   //   Gastos = negativos en BCGE con cuenta=persona
   //          + (solo Agus) Tarjeta total del mes (toda la tarjeta sale de su cuenta)
+
+  // DEBUG: filas BCGE del mes que NO tienen cuenta válida (Agus/Sofi)
+  // Estas filas afectan el balance del mes pero no se reflejan en ningún saldo personal.
+  const huerfanas = bcgeRows.filter(r =>
+    r._state !== 'deleted'
+    && r.mes === currentMonth
+    && r.año === currentYear
+    && !['Agus', 'Sofi'].includes((r.cuenta || '').trim())
+  );
+  if (huerfanas.length){
+    let totalH = huerfanas.reduce((s, r) => s + r.chf, 0);
+    console.warn(`[saldos] ${huerfanas.length} filas BCGE del mes ${currentMonth} sin cuenta=Agus/Sofi (impacto: ${totalH.toFixed(2)} CHF). Estas filas se cuentan en el Balance del mes pero NO en los saldos personales:`);
+    console.table(huerfanas.map(r => ({mes: r.mes, chf: r.chf, categoria: r.categoria, cuenta: r.cuenta || '(vacío)', comments: r.comments})));
+  }
+
   ['Agus', 'Sofi'].forEach(person => {
     // Ingresos: cualquier positivo BCGE con cuenta=persona (cualquier categoría)
     const ingresos = bcgeRows
