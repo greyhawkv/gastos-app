@@ -797,6 +797,24 @@ button,select,input{font-family:inherit;font-size:inherit}
   font-family:'Geist Mono',monospace;
   font-variant-numeric:tabular-nums;
 }
+#hover-tooltip .tt-section-head{
+  padding:6px 12px 4px;
+  margin-top:6px;
+  border-top:1px solid rgba(255,255,255,.1);
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.5);
+  font-style:italic;
+}
+#hover-tooltip .tt-body.dim{opacity:0.6}
+#hover-tooltip .tt-empty{
+  padding:6px 0;
+  font-size:11px;
+  color:rgba(255,255,255,.5);
+  font-style:italic;
+}
 
 /* TOAST */
 .toast{
@@ -1803,18 +1821,10 @@ function paidForCategory(cat, mes){
   const c = CATEGORIES.find(x => x.name === cat);
   if (!c) return 0;
   if (c.source === 'COMPUTED'){
-    // Mensualidades: para que el balance presupuestario coincida con el cash real,
-    // contamos TODO lo que salió de la cuenta cargado a Rev-Agus/Rev-Sofi en el mes:
-    //   - transferencias mensualidad (oficiales, marcadas mens)
-    //   - ajustes (no marcadas mens, ej: te transferiste 200 de adelanto sin marcar)
-    // El cuadro Mensualidades muestra esto como "Pagado" (lo que cash sintió).
+    // Mensualidades visibles: solo las filas marcadas explícitamente como "Es mensualidad".
+    // Los ajustes (Rev no mens) NO aparecen acá - ya están descontados en el Esperado (Plata libre).
     if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-      const mensTransfers = sumMonthlyTransfers(cat, mes);  // negativos marcados mens, abs
-      const ajustes = sumRevAdjustment(cat, mes);  // suma con signo (positivos+negativos no-mens)
-      // Para el "Pagado" cash: convertimos los ajustes a "salida de plata" si son negativos
-      // y los agregamos como salidas (abs). Si son positivos (te entró plata vía Rev), los restamos.
-      const ajustesNetos = -ajustes;  // si ajustes=-200 (te adelantaste), ajustesNetos=+200 (cash sintió 200 de salida)
-      return mensTransfers + ajustesNetos;
+      return sumMonthlyTransfers(cat, mes);
     }
     return 0;
   }
@@ -1825,6 +1835,18 @@ function paidForCategory(cat, mes){
     return sumTarjeta(cat, mes) * c.sign;
   }
   return 0;
+}
+
+// paidForBalance: usado SOLO por el balance del mes para cuadrar con cash.
+// Para Rev: devuelve mens + ajustes (todo lo que cash sintió como salida de cuenta).
+// Para el resto: igual que paidForCategory.
+function paidForBalance(cat, mes){
+  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
+    const mensTransfers = sumMonthlyTransfers(cat, mes);
+    const ajustes = sumRevAdjustment(cat, mes);
+    return mensTransfers + (-ajustes);
+  }
+  return paidForCategory(cat, mes);
 }
 
 function sumBCGE(cat, mes){
@@ -1882,6 +1904,19 @@ function expectedForCategory(cat, mes){
   return budgetForCategory(cat, mes);
 }
 
+// expectedForBalance: usado SOLO por el balance del mes para cuadrar con cash.
+// Diferencia con expectedForCategory: para Rev validadas, usa paidForBalance (cash total)
+// en lugar de paidForCategory (solo mens oficiales).
+// Esto hace que el balance presupuestario coincida con la suma de saldos cash.
+function expectedForBalance(cat, mes){
+  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
+    if (isValidated(cat, mes)) return paidForBalance(cat, mes);
+    return plataLibreFor(cat === 'Rev - Agus' ? 'Agus' : 'Sofi', mes);
+  }
+  if (isValidated(cat, mes)) return paidForCategory(cat, mes);
+  return budgetForCategory(cat, mes);
+}
+
 function pendingForCategory(cat, mes){
   // Si validado: Pendiente = 0 (cerrado, ya no se espera más)
   if (isValidated(cat, mes)) return 0;
@@ -1891,7 +1926,7 @@ function pendingForCategory(cat, mes){
 function totalBySection(section, mes){
   return CATEGORIES
     .filter(c => c.section === section)
-    .reduce((s, c) => s + expectedForCategory(c.name, mes), 0);
+    .reduce((s, c) => s + expectedForBalance(c.name, mes), 0);
 }
 function totalSectionPaid(section, mes){
   return CATEGORIES
@@ -2320,11 +2355,12 @@ function buildPagadoTooltip(cat, mes){
   const c = CATEGORIES.find(x => x.name === cat);
   if (!c) return '';
   const items = []; // {label, amount, isMens?}
+  const adjusts = []; // ajustes informativos (no suman al total)
 
   if (c.source === 'COMPUTED'){
-    // Rev - Agus / Rev - Sofi: incluye transferencias mens + ajustes
+    // Rev - Agus / Rev - Sofi: el "Pagado" solo muestra transferencias oficiales (mens)
+    // Los ajustes se muestran aparte como info (ya están descontados del Esperado vía Plata libre).
     if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-      // Transferencias mensualidad (negativas marcadas mens)
       bcgeRows
         .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && r.esMensualidad && r.chf < 0)
         .forEach(r => items.push({
@@ -2332,13 +2368,11 @@ function buildPagadoTooltip(cat, mes){
           amount: Math.abs(r.chf),
           isMens: true
         }));
-      // Ajustes (no marcados mens) - se muestran negativos como "salida"
       bcgeRows
         .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad)
-        .forEach(r => items.push({
+        .forEach(r => adjusts.push({
           label: (r.comments || '').slice(0, 38) || 'ajuste',
-          amount: -r.chf, // si chf=-200 (gasto), ajuste positivo en cash
-          isAdjust: true
+          amount: -r.chf,
         }));
     }
   } else if (c.source === 'BCGE'){
@@ -2357,17 +2391,31 @@ function buildPagadoTooltip(cat, mes){
       }));
   }
 
-  if (!items.length) return '';
+  if (!items.length && !adjusts.length) return '';
 
   // Construir HTML
   const total = items.reduce((s, i) => s + i.amount, 0);
   const rows = items.map(i => {
-    let badge = '';
-    if (i.isMens) badge = '<span class="tt-badge mens">mens</span>';
-    else if (i.isAdjust) badge = '<span class="tt-badge adj">ajuste</span>';
+    let badge = i.isMens ? '<span class="tt-badge mens">mens</span>' : '';
     return `<div class="tt-row"><span class="tt-label">${escapeHTML(i.label)}${badge}</span><span class="tt-amount">${fmt(i.amount)}</span></div>`;
   }).join('');
-  return `<div class="tt-header">${escapeHTML(cat)}</div><div class="tt-body">${rows}</div><div class="tt-total"><span>Total</span><span>${fmt(total)}</span></div>`;
+
+  let html = `<div class="tt-header">${escapeHTML(cat)}</div>`;
+  if (items.length){
+    html += `<div class="tt-body">${rows}</div><div class="tt-total"><span>Total</span><span>${fmt(total)}</span></div>`;
+  } else {
+    html += `<div class="tt-body"><div class="tt-empty">Sin transferencias oficiales</div></div>`;
+  }
+
+  // Sección de ajustes informativos (solo Rev)
+  if (adjusts.length){
+    const adjRows = adjusts.map(a =>
+      `<div class="tt-row"><span class="tt-label">${escapeHTML(a.label)}<span class="tt-badge adj">ajuste</span></span><span class="tt-amount">${fmt(a.amount)}</span></div>`
+    ).join('');
+    html += `<div class="tt-section-head">También vía Rev este mes (ya descontados del Esperado)</div><div class="tt-body dim">${adjRows}</div>`;
+  }
+
+  return html;
 }
 
 function renderSectionTable(section, tblId, totalId){  const tbl = document.getElementById(tblId);
