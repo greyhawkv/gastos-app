@@ -1874,6 +1874,34 @@ function renderDashboard(){
   const ahorros = totalBySection('AHORROS', currentMonth);
   const balance = ingresos - gastos - mens - ahorros;
 
+  // DEBUG: comparar balance vs saldos personales
+  const ingAgus = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Agus' && r.chf > 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+r.chf,0);
+  const gastoAgus = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Agus' && r.chf < 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+Math.abs(r.chf),0);
+  const tarjeta = tarjetaRows.filter(r => r._state !== 'deleted' && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+r.chf,0);
+  const saldoAgus = ingAgus - gastoAgus - tarjeta;
+  const ingSofi = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Sofi' && r.chf > 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+r.chf,0);
+  const gastoSofi = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Sofi' && r.chf < 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+Math.abs(r.chf),0);
+  const saldoSofi = ingSofi - gastoSofi;
+  console.log(`%c[debug ${currentMonth}] Balance vs saldos`, 'background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:3px;font-weight:600');
+  console.log(`  Balance del mes:  ${balance.toFixed(2)}`);
+  console.log(`     = Ingresos ${ingresos.toFixed(2)} - Gastos ${gastos.toFixed(2)} - Mens ${mens.toFixed(2)} - Ahorros ${ahorros.toFixed(2)}`);
+  console.log(`  Saldo Agus + Sofi: ${(saldoAgus + saldoSofi).toFixed(2)}`);
+  console.log(`     Agus: +${ingAgus.toFixed(2)} -${gastoAgus.toFixed(2)} -tarjeta ${tarjeta.toFixed(2)} = ${saldoAgus.toFixed(2)}`);
+  console.log(`     Sofi: +${ingSofi.toFixed(2)} -${gastoSofi.toFixed(2)} = ${saldoSofi.toFixed(2)}`);
+  const dif = balance - (saldoAgus + saldoSofi);
+  console.log(`  DIFERENCIA: ${dif.toFixed(2)}`);
+  if (Math.abs(dif) > 1){
+    // Buscar filas que aparezcan en una vista pero no en la otra
+    const huerfanas = bcgeRows.filter(r => r._state !== 'deleted' && r.mes === currentMonth && r.año === currentYear && !['Agus','Sofi'].includes((r.cuenta||'').trim()));
+    console.log(`  Filas BCGE sin cuenta (Agus/Sofi): ${huerfanas.length}`);
+    if (huerfanas.length){
+      console.table(huerfanas.map(r => ({categoria: r.categoria, chf: r.chf, cuenta: r.cuenta || '(vacío)', comments: r.comments})));
+    }
+    // Comparar mens y ahorros entre ambos modelos
+    console.log(`  Mens (totalBySection): ${mens.toFixed(2)} - este número se descuenta del Balance pero no de los saldos personales si las Rev no tienen cuenta=Agus/Sofi cargada`);
+    console.log(`  Ahorros (totalBySection): ${ahorros.toFixed(2)}`);
+  }
+
   const ingresosBudget = ingresosBudgetTotal;
   const gastosBudget = CATEGORIES.filter(c=>['FIJOS','TARJETA','ANUALES','OTROS'].includes(c.section)).reduce((s,c)=>s+budgetForCategory(c.name, currentMonth), 0);
 
