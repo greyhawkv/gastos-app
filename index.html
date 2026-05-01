@@ -1838,13 +1838,14 @@ function paidForCategory(cat, mes){
 }
 
 // paidForBalance: usado SOLO por el balance del mes para cuadrar con cash.
-// Para Rev: devuelve mens + ajustes (todo lo que cash sintió como salida de cuenta).
+// Para Rev: cuenta las transferencias mensuales + solo ajustes Rev negativos.
+// Los ajustes Rev positivos ya están incluidos en Ingresos, por eso no deben reducir gastos otra vez.
 // Para el resto: igual que paidForCategory.
 function paidForBalance(cat, mes){
   if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
     const mensTransfers = sumMonthlyTransfers(cat, mes);
-    const ajustes = sumRevAdjustment(cat, mes);
-    return mensTransfers + (-ajustes);
+    const ajustesNegativos = sumRevNegativeAdjustments(cat, mes);
+    return mensTransfers + ajustesNegativos;
   }
   return paidForCategory(cat, mes);
 }
@@ -1863,6 +1864,11 @@ function sumRevAdjustment(cat, mes){
   return bcgeRows
     .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad)
     .reduce((s, r) => s + r.chf, 0);
+}
+function sumRevNegativeAdjustments(cat, mes){
+  return bcgeRows
+    .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad && r.chf < 0)
+    .reduce((s, r) => s + Math.abs(r.chf), 0);
 }
 function sumTarjeta(cat, mes){
   return tarjetaRows
@@ -2264,14 +2270,15 @@ function openCuentaModal(person){
         if (a.categoria !== b.categoria) return a.categoria.localeCompare(b.categoria);
         return Math.abs(b.chf) - Math.abs(a.chf);
       });
-      // Total de la sección (suma de absolutos para gastos, positivo para ingresos)
-      const secTotal = secItems.reduce((s, it) => s + Math.abs(it.chf), 0);
+      // Total neto de la sección: positivos y negativos se compensan para reflejar impacto real en cuenta.
+      const secTotal = secItems.reduce((s, it) => s + it.chf, 0);
+      const secTotalSign = secTotal > 0 ? '+' : (secTotal < 0 ? '−' : '');
 
       html += `
         <div class="modal-section">
           <div class="modal-section-head">
             <span class="name">${escapeHTML(sec)}</span>
-            <span class="total">${fmt(secTotal)} CHF</span>
+            <span class="total ${secTotal < 0 ? 'neg' : (secTotal > 0 ? 'pos' : '')}">${secTotalSign}${fmt(Math.abs(secTotal))} CHF</span>
           </div>
           <table class="modal-tbl"><tbody>
       `;
