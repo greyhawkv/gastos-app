@@ -597,225 +597,6 @@ button,select,input{font-family:inherit;font-size:inherit}
   .modal-section-head{ padding:12px 18px 6px }
 }
 
-/* FORM en modal */
-#add-form .form-row{
-  display:flex;align-items:center;gap:14px;
-  margin-bottom:14px;
-}
-#add-form .form-row label{
-  flex:0 0 110px;
-  font-size:12px;font-weight:500;color:var(--ink-soft);
-  letter-spacing:-0.005em;
-}
-#add-form .form-row input[type="text"],
-#add-form .form-row input[type="number"],
-#add-form .form-row select{
-  flex:1;
-  padding:9px 12px;
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  background:var(--surface);
-  font-size:14px;
-  font-family:inherit;
-  color:var(--ink);
-  outline:none;
-  transition:border-color 0.15s;
-}
-#add-form .form-row input[type="number"]{
-  font-family:'Geist Mono',monospace;
-  font-variant-numeric:tabular-nums;
-}
-#add-form .form-row input:focus,
-#add-form .form-row select:focus{
-  border-color:var(--ink);
-}
-#add-form .form-row select{
-  cursor:pointer;
-  appearance:none;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%23a3a3a3' fill='none' stroke-width='1.5'/></svg>");
-  background-repeat:no-repeat;
-  background-position:right 10px center;
-  padding-right:28px;
-}
-#add-form .form-actions{
-  display:flex;gap:8px;justify-content:flex-end;
-  margin-top:22px;padding-top:18px;
-  border-top:1px solid var(--border);
-}
-
-/* COMMENTS */
-.comment-input-row{
-  display:flex;gap:10px;align-items:flex-start;
-}
-.comment-input-row textarea{
-  flex:1;
-  padding:10px 14px;
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  font-size:13px;font-family:inherit;line-height:1.5;
-  resize:vertical;
-  min-height:42px;
-  outline:none;
-  transition:border-color 0.15s;
-  background:var(--surface);
-  color:var(--ink);
-}
-.comment-input-row textarea:focus{
-  border-color:var(--ink);
-}
-.comment-item{
-  display:flex;gap:12px;align-items:flex-start;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-.comment-item:last-child{border-bottom:none}
-.comment-author{
-  font-size:11px;font-weight:600;
-  padding:3px 10px;
-  border-radius:99px;
-  flex-shrink:0;
-  letter-spacing:0.02em;
-}
-.comment-author.agus{background:#dbeafe;color:#1e40af}
-.comment-author.sofi{background:#fce7f3;color:#9f1239}
-.comment-body{
-  flex:1;
-  font-size:13px;color:var(--ink);
-  line-height:1.5;
-  white-space:pre-wrap;
-}
-.comment-meta{
-  font-size:11px;color:var(--ink-faint);
-  margin-top:4px;
-  font-family:'Geist Mono',monospace;
-}
-.comment-delete{
-  background:transparent;border:none;cursor:pointer;
-  padding:4px;border-radius:4px;color:var(--ink-faint);
-  font-size:14px;flex-shrink:0;opacity:0;
-  transition:opacity 0.15s, color 0.15s;
-}
-.comment-item:hover .comment-delete{opacity:1}
-.comment-delete:hover{color:var(--negative)}
-.comments-empty{
-  text-align:center;padding:18px;
-  color:var(--ink-faint);font-size:12px;font-style:italic;
-}
-
-.transfer-badge{
-  display:inline-block;
-  padding:2px 8px;
-  margin-right:6px;
-  background:#fef3c7;
-  color:#92400e;
-  font-size:10px;
-  font-weight:600;
-  border-radius:99px;
-  letter-spacing:0.02em;
-  vertical-align:middle;
-}
-
-/* TOOLTIP en celdas Pagado */
-.has-tooltip{
-  cursor:help;
-  position:relative;
-  text-decoration:underline;
-  text-decoration-style:dotted;
-  text-decoration-color:var(--ink-faint);
-  text-underline-offset:3px;
-}
-#hover-tooltip{
-  position:fixed;
-  z-index:5000;
-  background:var(--ink);
-  color:#fff;
-  border-radius:8px;
-  padding:8px 0;
-  font-size:11px;
-  line-height:1.4;
-  pointer-events:none;
-  box-shadow:0 8px 24px -6px rgba(0,0,0,.3);
-  min-width:240px;
-  max-width:340px;
-  display:none;
-  font-family:'Geist',sans-serif;
-}
-#hover-tooltip.visible{display:block}
-#hover-tooltip .tt-header{
-  padding:0 12px 6px;
-  margin-bottom:4px;
-  border-bottom:1px solid rgba(255,255,255,.1);
-  font-weight:600;
-  font-size:11px;
-  letter-spacing:0.02em;
-}
-#hover-tooltip .tt-body{padding:0 12px}
-#hover-tooltip .tt-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  padding:3px 0;
-  font-size:11px;
-}
-#hover-tooltip .tt-label{
-  flex:1;
-  color:rgba(255,255,255,.85);
-  display:flex;
-  align-items:center;
-  gap:6px;
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-#hover-tooltip .tt-amount{
-  font-family:'Geist Mono',monospace;
-  font-variant-numeric:tabular-nums;
-  flex-shrink:0;
-}
-#hover-tooltip .tt-badge{
-  font-size:9px;
-  padding:1px 5px;
-  border-radius:99px;
-  font-weight:600;
-  letter-spacing:0.02em;
-  text-transform:uppercase;
-}
-#hover-tooltip .tt-badge.mens{background:#10b981;color:#fff}
-#hover-tooltip .tt-badge.adj{background:#f59e0b;color:#1f1f1f}
-#hover-tooltip .tt-total{
-  display:flex;
-  justify-content:space-between;
-  padding:6px 12px 0;
-  margin-top:4px;
-  border-top:1px solid rgba(255,255,255,.1);
-  font-weight:600;
-  font-size:11px;
-}
-#hover-tooltip .tt-total span:last-child{
-  font-family:'Geist Mono',monospace;
-  font-variant-numeric:tabular-nums;
-}
-#hover-tooltip .tt-section-head{
-  padding:6px 12px 4px;
-  margin-top:6px;
-  border-top:1px solid rgba(255,255,255,.1);
-  font-size:9px;
-  font-weight:500;
-  letter-spacing:0.04em;
-  text-transform:uppercase;
-  color:rgba(255,255,255,.5);
-  font-style:italic;
-}
-#hover-tooltip .tt-body.dim{opacity:0.6}
-#hover-tooltip .tt-empty{
-  padding:6px 0;
-  font-size:11px;
-  color:rgba(255,255,255,.5);
-  font-style:italic;
-}
-
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;right:24px;
@@ -1013,11 +794,6 @@ button,select,input{font-family:inherit;font-size:inherit}
 
 <main id="app" class="hidden">
 
-  <!-- SELECTOR DE MES GLOBAL -->
-  <div class="controls" style="margin-bottom:18px">
-    <div class="month-tabs" id="month-tabs"></div>
-  </div>
-
   <!-- TABS -->
   <nav class="nav-tabs">
     <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
@@ -1038,6 +814,9 @@ button,select,input{font-family:inherit;font-size:inherit}
 
   <!-- ============= TAB DASHBOARD ============= -->
   <div class="tab-content active" id="tab-dashboard">
+    <div class="controls">
+      <div class="month-tabs" id="month-tabs"></div>
+    </div>
 
     <div id="alert-banner" class="alert ok">
       <div class="icon">✓</div>
@@ -1099,7 +878,6 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div class="persona-row"><span class="l">Varios Agus</span><span class="v minus" id="agus-varios">—</span></div>
           <div class="persona-row"><span class="l">½ Varios nuestros</span><span class="v minus" id="agus-vn">—</span></div>
           <div class="persona-row"><span class="l">½ Varios casa</span><span class="v minus" id="agus-vc">—</span></div>
-          <div class="persona-row"><span class="l">Ajuste Rev - Agus</span><span class="v" id="agus-rev-ajuste">—</span></div>
           <div class="persona-row final"><span class="l">Plata libre</span><span class="v" id="agus-libre">—</span></div>
         </div>
         <div class="persona sofi">
@@ -1109,7 +887,6 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div class="persona-row"><span class="l">Varios Sofi</span><span class="v minus" id="sofi-varios">—</span></div>
           <div class="persona-row"><span class="l">½ Varios nuestros</span><span class="v minus" id="sofi-vn">—</span></div>
           <div class="persona-row"><span class="l">½ Varios casa</span><span class="v minus" id="sofi-vc">—</span></div>
-          <div class="persona-row"><span class="l">Ajuste Rev - Sofi</span><span class="v" id="sofi-rev-ajuste">—</span></div>
           <div class="persona-row final"><span class="l">Plata libre</span><span class="v" id="sofi-libre">—</span></div>
         </div>
       </div>
@@ -1129,21 +906,6 @@ button,select,input{font-family:inherit;font-size:inherit}
         <div class="card"><div class="card-head"><h3>Ahorros</h3><span class="count" id="ahorros-total">—</span></div><table class="tbl" id="tbl-ahorros"></table></div>
       </div>
     </section>
-
-    <!-- COMENTARIOS DEL MES -->
-    <section class="section">
-      <div class="section-head">
-        <h2>Notas del mes</h2>
-        <span class="meta">comentarios compartidos · se guardan al hacer "Guardar en Sheets"</span>
-      </div>
-      <div class="card" style="padding:20px">
-        <div id="comments-list" style="margin-bottom:16px"></div>
-        <div class="comment-input-row">
-          <textarea id="comment-input" placeholder="Escribí algo sobre este mes..." rows="2"></textarea>
-          <button class="btn primary" onclick="addComment()">Agregar</button>
-        </div>
-      </div>
-    </section>
   </div>
 
   <!-- ============= TAB INGRESOS ============= -->
@@ -1156,6 +918,10 @@ button,select,input{font-family:inherit;font-size:inherit}
     <div class="sub-tabs" id="ingresos-subtabs">
       <button class="sub-tab agus active" data-person="Agus"><span class="dot"></span>Agus</button>
       <button class="sub-tab sofi" data-person="Sofi"><span class="dot"></span>Sofi</button>
+    </div>
+
+    <div class="filters-bar">
+      <select class="filter-input" id="ingresos-mes-filter"></select>
     </div>
 
     <div class="section-summary">
@@ -1185,7 +951,6 @@ button,select,input{font-family:inherit;font-size:inherit}
           <tr>
             <th class="col-narrow">Mes</th>
             <th class="col-wide">Descripción / Comentario</th>
-            <th class="col-medium">Categoría</th>
             <th class="r col-medium">Monto</th>
             <th class="c col-narrow">Acciones</th>
           </tr>
@@ -1209,6 +974,7 @@ button,select,input{font-family:inherit;font-size:inherit}
     </div>
 
     <div class="filters-bar">
+      <select class="filter-input" id="gastos-mes-filter"></select>
       <select class="filter-input" id="gastos-source-filter">
         <option value="">Todas las fuentes</option>
         <option value="BCGE">Solo BCGE</option>
@@ -1255,8 +1021,7 @@ button,select,input{font-family:inherit;font-size:inherit}
             <th class="col-wide">Descripción</th>
             <th class="col-medium">Categoría</th>
             <th class="r col-medium">Monto</th>
-            <th class="c col-narrow">Mens.</th>
-            <th class="c col-narrow"></th>
+            <th class="c col-narrow">Acciones</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -1308,76 +1073,11 @@ button,select,input{font-family:inherit;font-size:inherit}
   </div>
 </div>
 
-<!-- ============= MODAL AGREGAR MOVIMIENTO ============= -->
-<div id="add-modal" class="modal-backdrop hidden" onclick="closeAddModal(event)">
-  <div class="modal-content" onclick="event.stopPropagation()" style="max-width:480px">
-    <div class="modal-head">
-      <div>
-        <div class="modal-title" id="add-modal-title">Nuevo</div>
-        <div class="modal-subtitle" id="add-modal-subtitle">—</div>
-      </div>
-      <button class="modal-close" onclick="closeAddModal()" aria-label="Cerrar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body" style="padding:22px 26px">
-      <form id="add-form" onsubmit="event.preventDefault(); submitAddForm()">
-        <div class="form-row">
-          <label>Mes</label>
-          <select id="add-mes"></select>
-        </div>
-        <div class="form-row" id="add-fuente-row">
-          <label>Fuente</label>
-          <select id="add-fuente">
-            <option value="BCGE">BCGE</option>
-            <option value="Tarjeta">Tarjeta</option>
-          </select>
-        </div>
-        <div class="form-row" id="add-cuenta-row">
-          <label>Cuenta</label>
-          <select id="add-cuenta">
-            <option value="Agus">Agus</option>
-            <option value="Sofi">Sofi</option>
-          </select>
-        </div>
-        <div class="form-row" id="add-transfer-destino-row" style="display:none">
-          <label>Hacia cuenta</label>
-          <select id="add-cuenta-destino">
-            <option value="Agus">Agus</option>
-            <option value="Sofi">Sofi</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Categoría</label>
-          <select id="add-categoria"></select>
-        </div>
-        <div class="form-row">
-          <label>Descripción</label>
-          <input type="text" id="add-descripcion" placeholder="Detalle (opcional)" autocomplete="off">
-        </div>
-        <div class="form-row">
-          <label>Monto (CHF)</label>
-          <input type="number" id="add-monto" placeholder="0" step="0.01" required>
-        </div>
-        <div class="form-row" id="add-mensualidad-row" style="display:none">
-          <label>Es mensualidad</label>
-          <input type="checkbox" id="add-mensualidad" style="width:18px;height:18px">
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn ghost" onclick="closeAddModal()">Cancelar</button>
-          <button type="submit" class="btn primary">Agregar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="footer">v2.0 · sincronizado con Google Sheets</div>
+<div class="footer">v2.0 · datos locales · click descargar para sincronizar con OneDrive</div>
 
 </div>
 
 <div id="toast" style="display:none"></div>
-<div id="hover-tooltip"></div>
 
 <script>
 // =============================================================
@@ -1439,10 +1139,6 @@ const CATEGORIES = [
   {section:'AHORROS', name:'Rev - CDP', source:'BCGE', sign:-1},
   {section:'AHORROS', name:'Rev - Impuestos', source:'BCGE', sign:-1},
   {section:'AHORROS', name:'Rev - Vacaciones Sofi', source:'BCGE', sign:-1},
-  // TRANSFERENCIAS: categoría neutra. No afecta el balance del mes (no es ingreso ni gasto).
-  // Se usa para registrar movimientos entre cuentas Agus↔Sofi.
-  // Cuando se crea desde la app, se generan 2 filas opuestas (gasto en origen, ingreso en destino).
-  {section:'TRANSFERENCIAS', name:'Transferencia interna', source:'BCGE', sign:0},
 ];
 
 // =============================================================
@@ -1453,8 +1149,6 @@ let originalFileName = 'gastos.xlsx';
 let bcgeRows = [];     // [{id, año, mes, chf, categoria, cuenta, comments, _state}]
 let tarjetaRows = [];  // [{id, año, mes, fecha, descripcion, chf, categoria, comments, _state}]
 let budgetData = {};   // budgetData[catName][mes] = {budget, validated}
-let commentsData = []; // [{id, mes, año, autor, texto, fecha, _state}]
-let addModalContext = 'gasto'; // 'ingreso' o 'gasto' - decide opciones del form
 let currentMonth = 'Enero';
 let currentYear = 2026;
 let currentIngresoPerson = 'Agus';  // sub-tab activa en Ingresos
@@ -1578,39 +1272,21 @@ async function loadFromSheets(){
 
   showToast('Cargando datos desde Sheets...', 'success');
   try {
-    // Leer las hojas necesarias en una sola request (batchGet).
-    // Comentarios es opcional - si no existe la hoja, ignoramos el error de esa hoja.
-    const ranges = ['BCGE!A:Z', 'Tarjeta!A:Z', 'Budgets!A:AB', 'Comentarios!A:E'];
-    let valueRanges;
-    try {
-      const resp = await gapi.client.sheets.spreadsheets.values.batchGet({
-        spreadsheetId: SHEET_ID,
-        ranges: ranges,
-      });
-      valueRanges = resp.result.valueRanges;
-    } catch(err){
-      // Si falla por Comentarios faltante, intenta sin esa hoja
-      if (err?.result?.error?.message?.includes('Comentarios') || err?.status === 400){
-        const resp = await gapi.client.sheets.spreadsheets.values.batchGet({
-          spreadsheetId: SHEET_ID,
-          ranges: ranges.slice(0, 3),
-        });
-        valueRanges = [...resp.result.valueRanges, {values: []}];
-        console.warn('[loadFromSheets] Hoja Comentarios no existe; se ignora');
-      } else {
-        throw err;
-      }
-    }
+    // Leer las 3 hojas necesarias en una sola request (batchGet)
+    const ranges = ['BCGE!A:Z', 'Tarjeta!A:Z', 'Budgets!A:AB'];
+    const resp = await gapi.client.sheets.spreadsheets.values.batchGet({
+      spreadsheetId: SHEET_ID,
+      ranges: ranges,
+    });
 
+    const valueRanges = resp.result.valueRanges;
     const bcgeData = valueRanges[0].values || [];
     const tarjetaData = valueRanges[1].values || [];
     const budgetsData = valueRanges[2].values || [];
-    const commentsRows = (valueRanges[3] && valueRanges[3].values) || [];
 
     parseBCGEFromRows(bcgeData);
     parseTarjetaFromRows(tarjetaData);
     parseBudgetsFromRows(budgetsData);
-    parseCommentsFromRows(commentsRows);
 
     uploadZone.classList.add('hidden');
     app.classList.remove('hidden');
@@ -1624,33 +1300,6 @@ async function loadFromSheets(){
     console.error('Error cargando Sheets:', err);
     const msg = err?.result?.error?.message || err.message || 'desconocido';
     showToast('Error: ' + msg, 'error');
-  }
-}
-
-// Parsea Comentarios desde array de filas
-// Layout esperado: id | mes | año | autor | texto | fecha
-function parseCommentsFromRows(arr){
-  commentsData = [];
-  if (!arr || !arr.length) return;
-  // Skip header row
-  for (let i = 1; i < arr.length; i++){
-    const r = arr[i];
-    if (!r) continue;
-    const mes = r[0];
-    const año = parseInt(r[1]) || currentYear;
-    const autor = r[2];
-    const texto = r[3];
-    const fecha = r[4];
-    if (!mes || !texto) continue;
-    commentsData.push({
-      id: nextRowId++,
-      mes: String(mes).trim(),
-      año,
-      autor: String(autor || '').trim(),
-      texto: String(texto),
-      fecha: String(fecha || ''),
-      _state: 'clean'
-    });
   }
 }
 
@@ -1675,7 +1324,6 @@ function parseBCGEFromRows(arr){
       chf, categoria: String(cat).trim(),
       cuenta: r[4] || '',
       comments: r[5] || '',
-      esMensualidad: parseBoolean(r[6]),
       _state: 'clean'
     });
   }
@@ -1718,11 +1366,6 @@ function normHeader(value){
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
-}
-
-function parseBoolean(value){
-  const v = String(value ?? '').toLowerCase().trim();
-  return value === true || value === 1 || v === '1' || v === 'true' || v === 'yes' || v === 'sí' || v === 'si';
 }
 
 function findBudgetsLayout(arr){
@@ -1821,10 +1464,13 @@ function paidForCategory(cat, mes){
   const c = CATEGORIES.find(x => x.name === cat);
   if (!c) return 0;
   if (c.source === 'COMPUTED'){
-    // Mensualidades visibles: solo las filas marcadas explícitamente como "Es mensualidad".
-    // Los ajustes (Rev no mens) NO aparecen acá - ya están descontados en el Esperado (Plata libre).
-    if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-      return sumMonthlyTransfers(cat, mes);
+    // Rev - Agus / Rev - Sofi en la tabla Mensualidades:
+    // usar SOLO la transferencia BCGE real, para no doble contar tarjeta/varios.
+    // La sección "Plata libre para vivir" mantiene su cálculo separado más abajo.
+    if (cat === 'Rev - Agus'){
+      return sumBCGE('Rev - Agus', mes) * -1;  // gastos negativos → positivos
+    } else if (cat === 'Rev - Sofi'){
+      return sumBCGE('Rev - Sofi', mes) * -1;
     }
     return 0;
   }
@@ -1837,31 +1483,9 @@ function paidForCategory(cat, mes){
   return 0;
 }
 
-// paidForBalance: usado SOLO por el balance del mes para cuadrar con cash.
-// Para Rev: devuelve mens + ajustes (todo lo que cash sintió como salida de cuenta).
-// Para el resto: igual que paidForCategory.
-function paidForBalance(cat, mes){
-  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-    const mensTransfers = sumMonthlyTransfers(cat, mes);
-    const ajustes = sumRevAdjustment(cat, mes);
-    return mensTransfers + (-ajustes);
-  }
-  return paidForCategory(cat, mes);
-}
-
 function sumBCGE(cat, mes){
   return bcgeRows
     .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
-    .reduce((s, r) => s + r.chf, 0);
-}
-function sumMonthlyTransfers(cat, mes){
-  return bcgeRows
-    .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && r.esMensualidad && r.chf < 0)
-    .reduce((s, r) => s + Math.abs(r.chf), 0);
-}
-function sumRevAdjustment(cat, mes){
-  return bcgeRows
-    .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad)
     .reduce((s, r) => s + r.chf, 0);
 }
 function sumTarjeta(cat, mes){
@@ -1877,56 +1501,37 @@ function isValidated(cat, mes){
   return !!budgetData[cat]?.[mes]?.validated;
 }
 
-// Plata libre / Esperado para Rev - Agus / Rev - Sofi
-// Es el mismo cálculo en los dos lugares: budget − tarjeta − varios − ½ nuestros − ½ casa + ajustes Rev no marcados como mensualidad
-// "ajustes" = Rev - Agus que NO son mensualidad oficial (ej: te transferiste 200 de adelanto sin marcarlo como mens)
-//   Esos 200 ya te los gastaste/cobraste, así que se restan del Plata libre.
-function plataLibreFor(person, mes){
-  const cat = 'Rev - ' + person;
-  const nominal = budgetForCategory(cat, mes);
-  const tarjetaPersonal = Math.abs(paidForCategory(person, mes));  // Tarjeta categoría 'Agus' o 'Sofi'
-  const variosPersonal = Math.abs(paidForCategory('Varios ' + person, mes));
-  const halfVN = Math.abs(paidForCategory('Varios nuestros', mes)) / 2;
-  const halfVC = Math.abs(paidForCategory('Varios Casa', mes)) / 2;
-  const ajusteRev = sumRevAdjustment(cat, mes); // negativo si te adelantaste (gasto)
-  return nominal - tarjetaPersonal - variosPersonal - halfVN - halfVC + ajusteRev;
+// Ingresos proyectados: usa ingresos reales positivos si ya existen en el mes;
+// si todavía no se cargó ningún ingreso real, usa el budget de ingresos.
+function projectedIncomeForMonth(mes){
+  const real = bcgeRows
+    .filter(r => r._state !== 'deleted'
+      && r.año === currentYear
+      && r.mes === mes
+      && r.chf > 0
+      && ['Agus', 'Sofi'].includes((r.cuenta || '').trim()))
+    .reduce((s, r) => s + r.chf, 0);
+
+  if (real !== 0) return real;
+
+  return CATEGORIES
+    .filter(c => c.section === 'INGRESOS')
+    .reduce((s, c) => s + budgetForCategory(c.name, mes), 0);
 }
 
-// expectedForCategory: lógica unificada según validación.
-//   Sin validar → forecast (Plata libre para Rev, Budget para el resto)
-//   Validado → Pagado (real)
 function expectedForCategory(cat, mes){
-  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-    if (isValidated(cat, mes)) return paidForCategory(cat, mes);
-    return plataLibreFor(cat === 'Rev - Agus' ? 'Agus' : 'Sofi', mes);
-  }
+  // Si está validado: usa pagado. Si no: usa budget.
   if (isValidated(cat, mes)) return paidForCategory(cat, mes);
   return budgetForCategory(cat, mes);
 }
-
-// expectedForBalance: usado SOLO por el balance del mes para cuadrar con cash.
-// Diferencia con expectedForCategory: para Rev validadas, usa paidForBalance (cash total)
-// en lugar de paidForCategory (solo mens oficiales).
-// Esto hace que el balance presupuestario coincida con la suma de saldos cash.
-function expectedForBalance(cat, mes){
-  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-    if (isValidated(cat, mes)) return paidForBalance(cat, mes);
-    return plataLibreFor(cat === 'Rev - Agus' ? 'Agus' : 'Sofi', mes);
-  }
-  if (isValidated(cat, mes)) return paidForCategory(cat, mes);
-  return budgetForCategory(cat, mes);
-}
-
 function pendingForCategory(cat, mes){
-  // Si validado: Pendiente = 0 (cerrado, ya no se espera más)
-  if (isValidated(cat, mes)) return 0;
   return expectedForCategory(cat, mes) - paidForCategory(cat, mes);
 }
 
 function totalBySection(section, mes){
   return CATEGORIES
     .filter(c => c.section === section)
-    .reduce((s, c) => s + expectedForBalance(c.name, mes), 0);
+    .reduce((s, c) => s + expectedForCategory(c.name, mes), 0);
 }
 function totalSectionPaid(section, mes){
   return CATEGORIES
@@ -1978,7 +1583,6 @@ function renderAll(){
   renderGastos();
   renderBudgetsEditor();
   renderForecast();
-  renderComments();
 }
 
 function renderMonthTabs(){
@@ -1989,70 +1593,22 @@ function renderMonthTabs(){
     btn.className = 'month-tab' + (m === currentMonth ? ' active' : '');
     btn.textContent = m.slice(0,3);
     btn.title = m;
-    btn.onclick = () => {
-      currentMonth = m;
-      renderMonthTabs();
-      // Refrescar todas las vistas para que reflejen el nuevo mes
-      renderDashboard();
-      renderIngresos();
-      renderGastos();
-      renderForecast();
-      renderComments();
-    };
+    btn.onclick = () => { currentMonth = m; renderDashboard(); renderMonthTabs(); };
     tabs.appendChild(btn);
   });
 }
 
 function renderDashboard(){
   // KPIs
-  // Ingresos: usar ingresos reales positivos de BCGE si existen; si no, usar budget.
-  // Esto mantiene el KPI alineado con el detalle de cuentas y la pestaña Ingresos.
-  const ingresosReal = bcgeRows
-    .filter(r => r._state !== 'deleted'
-      && r.año === currentYear
-      && r.mes === currentMonth
-      && r.chf > 0
-      && ['Agus', 'Sofi'].includes((r.cuenta || '').trim()))
-    .reduce((s, r) => s + r.chf, 0);
-  const ingresosBudgetTotal = CATEGORIES
-    .filter(c => c.section === 'INGRESOS')
-    .reduce((s, c) => s + budgetForCategory(c.name, currentMonth), 0);
-  const ingresos = ingresosReal !== 0 ? ingresosReal : ingresosBudgetTotal;
+  // Ingresos proyectados: reales si existen; si no, budget.
+  const ingresos = projectedIncomeForMonth(currentMonth);
   const gastos = totalBySection('FIJOS', currentMonth) + totalBySection('TARJETA', currentMonth) +
                  totalBySection('ANUALES', currentMonth) + totalBySection('OTROS', currentMonth);
   const mens = totalBySection('MENSUALIDADES', currentMonth);
   const ahorros = totalBySection('AHORROS', currentMonth);
   const balance = ingresos - gastos - mens - ahorros;
 
-  // DEBUG: comparar balance vs saldos personales
-  const ingAgus = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Agus' && r.chf > 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+r.chf,0);
-  const gastoAgus = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Agus' && r.chf < 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+Math.abs(r.chf),0);
-  const tarjeta = tarjetaRows.filter(r => r._state !== 'deleted' && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+r.chf,0);
-  const saldoAgus = ingAgus - gastoAgus - tarjeta;
-  const ingSofi = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Sofi' && r.chf > 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+r.chf,0);
-  const gastoSofi = bcgeRows.filter(r => r._state !== 'deleted' && (r.cuenta||'').trim() === 'Sofi' && r.chf < 0 && r.mes === currentMonth && r.año === currentYear).reduce((s,r)=>s+Math.abs(r.chf),0);
-  const saldoSofi = ingSofi - gastoSofi;
-  console.log(`%c[debug ${currentMonth}] Balance vs saldos`, 'background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:3px;font-weight:600');
-  console.log(`  Balance del mes:  ${balance.toFixed(2)}`);
-  console.log(`     = Ingresos ${ingresos.toFixed(2)} - Gastos ${gastos.toFixed(2)} - Mens ${mens.toFixed(2)} - Ahorros ${ahorros.toFixed(2)}`);
-  console.log(`  Saldo Agus + Sofi: ${(saldoAgus + saldoSofi).toFixed(2)}`);
-  console.log(`     Agus: +${ingAgus.toFixed(2)} -${gastoAgus.toFixed(2)} -tarjeta ${tarjeta.toFixed(2)} = ${saldoAgus.toFixed(2)}`);
-  console.log(`     Sofi: +${ingSofi.toFixed(2)} -${gastoSofi.toFixed(2)} = ${saldoSofi.toFixed(2)}`);
-  const dif = balance - (saldoAgus + saldoSofi);
-  console.log(`  DIFERENCIA: ${dif.toFixed(2)}`);
-  if (Math.abs(dif) > 1){
-    // Buscar filas que aparezcan en una vista pero no en la otra
-    const huerfanas = bcgeRows.filter(r => r._state !== 'deleted' && r.mes === currentMonth && r.año === currentYear && !['Agus','Sofi'].includes((r.cuenta||'').trim()));
-    console.log(`  Filas BCGE sin cuenta (Agus/Sofi): ${huerfanas.length}`);
-    if (huerfanas.length){
-      console.table(huerfanas.map(r => ({categoria: r.categoria, chf: r.chf, cuenta: r.cuenta || '(vacío)', comments: r.comments})));
-    }
-    // Comparar mens y ahorros entre ambos modelos
-    console.log(`  Mens (totalBySection): ${mens.toFixed(2)} - este número se descuenta del Balance pero no de los saldos personales si las Rev no tienen cuenta=Agus/Sofi cargada`);
-    console.log(`  Ahorros (totalBySection): ${ahorros.toFixed(2)}`);
-  }
-
-  const ingresosBudget = ingresosBudgetTotal;
+  const ingresosBudget = CATEGORIES.filter(c=>c.section==='INGRESOS').reduce((s,c)=>s+budgetForCategory(c.name, currentMonth), 0);
   const gastosBudget = CATEGORIES.filter(c=>['FIJOS','TARJETA','ANUALES','OTROS'].includes(c.section)).reduce((s,c)=>s+budgetForCategory(c.name, currentMonth), 0);
 
   document.getElementById('kpi-ingresos').innerHTML = fmtCHF(ingresos);
@@ -2107,33 +1663,16 @@ function renderDashboard(){
 
 // Saldo cuentas BCGE: ingresos del mes a la cuenta − gastos debitados de la cuenta
 function renderSaldosBCGE(){
-  // Para cada persona:
-  //   Ingresos = positivos en BCGE con cuenta=persona (cualquier categoría: salario, twint, devolución, etc.)
-  //   Gastos = negativos en BCGE con cuenta=persona
-  //          + (solo Agus) Tarjeta total del mes (toda la tarjeta sale de su cuenta)
-
-  // DEBUG: filas BCGE del mes que NO tienen cuenta válida (Agus/Sofi)
-  // Estas filas afectan el balance del mes pero no se reflejan en ningún saldo personal.
-  const huerfanas = bcgeRows.filter(r =>
-    r._state !== 'deleted'
-    && r.mes === currentMonth
-    && r.año === currentYear
-    && !['Agus', 'Sofi'].includes((r.cuenta || '').trim())
-  );
-  if (huerfanas.length){
-    let totalH = huerfanas.reduce((s, r) => s + r.chf, 0);
-    console.warn(`[saldos] ${huerfanas.length} filas BCGE del mes ${currentMonth} sin cuenta=Agus/Sofi (impacto: ${totalH.toFixed(2)} CHF). Estas filas se cuentan en el Balance del mes pero NO en los saldos personales:`);
-    console.table(huerfanas.map(r => ({mes: r.mes, chf: r.chf, categoria: r.categoria, cuenta: r.cuenta || '(vacío)', comments: r.comments})));
-  }
-
+  // Para cada persona: ingresos reales positivos de esa cuenta,
+  // gastos reales negativos de esa cuenta, y tarjeta descontada de Agus.
   ['Agus', 'Sofi'].forEach(person => {
-    // Ingresos: cualquier positivo BCGE con cuenta=persona (cualquier categoría)
+    // Ingresos: cualquier positivo BCGE con cuenta=persona
     const ingresos = bcgeRows
       .filter(r => r._state !== 'deleted'
         && (r.cuenta || '').trim() === person
-        && r.chf > 0
         && r.mes === currentMonth
-        && r.año === currentYear)
+        && r.año === currentYear
+        && r.chf > 0)
       .reduce((s, r) => s + r.chf, 0);
 
     // Gastos BCGE de esa cuenta (negativos en cuenta = persona)
@@ -2313,112 +1852,40 @@ function escCloseHandler(e){
 }
 
 function renderPersonas(){
-  // AGUS - desglose visible de los componentes
+  // AGUS - mensualidad nominal = budget de Rev-Agus (siempre 1600 nominal)
+  // Para la plata libre, todos los consumos se tratan como deducciones positivas.
+  // Esto evita el bug visual y contable de "−−676" cuando una categoría llega con signo negativo.
   const agusNom = budgetForCategory('Rev - Agus', currentMonth);
   const agusTar = Math.abs(paidForCategory('Agus', currentMonth));
   const agusVar = Math.abs(paidForCategory('Varios Agus', currentMonth));
   const halfVN = Math.abs(paidForCategory('Varios nuestros', currentMonth)) / 2;
   const halfVC = Math.abs(paidForCategory('Varios Casa', currentMonth)) / 2;
-  const agusRevAjuste = sumRevAdjustment('Rev - Agus', currentMonth);
-  // Total: usa la función central para garantizar consistencia con Esperado de Mensualidades
-  const agusLibre = plataLibreFor('Agus', currentMonth);
+  const agusLibre = agusNom - agusTar - agusVar - halfVN - halfVC;
 
   document.getElementById('agus-mens').textContent = fmt(agusNom);
   document.getElementById('agus-tarjeta').textContent = '−' + fmt(agusTar);
   document.getElementById('agus-varios').textContent = '−' + fmt(agusVar);
   document.getElementById('agus-vn').textContent = '−' + fmt(halfVN);
   document.getElementById('agus-vc').textContent = '−' + fmt(halfVC);
-  document.getElementById('agus-rev-ajuste').textContent = fmtSign(agusRevAjuste);
-  document.getElementById('agus-rev-ajuste').className = 'v ' + (agusRevAjuste < 0 ? 'minus' : '');
   document.getElementById('agus-libre').innerHTML = fmtCHF(agusLibre);
 
   // SOFI
   const sofiNom = budgetForCategory('Rev - Sofi', currentMonth);
   const sofiTar = Math.abs(paidForCategory('Sofi', currentMonth));
   const sofiVar = Math.abs(paidForCategory('Varios Sofi', currentMonth));
-  const sofiRevAjuste = sumRevAdjustment('Rev - Sofi', currentMonth);
-  const sofiLibre = plataLibreFor('Sofi', currentMonth);
+  const sofiLibre = sofiNom - sofiTar - sofiVar - halfVN - halfVC;
 
   document.getElementById('sofi-mens').textContent = fmt(sofiNom);
   document.getElementById('sofi-tarjeta').textContent = '−' + fmt(sofiTar);
   document.getElementById('sofi-varios').textContent = '−' + fmt(sofiVar);
   document.getElementById('sofi-vn').textContent = '−' + fmt(halfVN);
   document.getElementById('sofi-vc').textContent = '−' + fmt(halfVC);
-  document.getElementById('sofi-rev-ajuste').textContent = fmtSign(sofiRevAjuste);
-  document.getElementById('sofi-rev-ajuste').className = 'v ' + (sofiRevAjuste < 0 ? 'minus' : '');
   document.getElementById('sofi-libre').innerHTML = fmtCHF(sofiLibre);
+
 }
 
-// Devuelve HTML con el desglose de movimientos que suman al "Pagado" de una categoría/mes.
-// Se usa como tooltip en hover de la celda Pagado.
-function buildPagadoTooltip(cat, mes){
-  const c = CATEGORIES.find(x => x.name === cat);
-  if (!c) return '';
-  const items = []; // {label, amount, isMens?}
-  const adjusts = []; // ajustes informativos (no suman al total)
-
-  if (c.source === 'COMPUTED'){
-    // Rev - Agus / Rev - Sofi: el "Pagado" solo muestra transferencias oficiales (mens)
-    // Los ajustes se muestran aparte como info (ya están descontados del Esperado vía Plata libre).
-    if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-      bcgeRows
-        .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && r.esMensualidad && r.chf < 0)
-        .forEach(r => items.push({
-          label: (r.comments || '').slice(0, 38) || 'mensualidad',
-          amount: Math.abs(r.chf),
-          isMens: true
-        }));
-      bcgeRows
-        .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && !r.esMensualidad)
-        .forEach(r => adjusts.push({
-          label: (r.comments || '').slice(0, 38) || 'ajuste',
-          amount: -r.chf,
-        }));
-    }
-  } else if (c.source === 'BCGE'){
-    bcgeRows
-      .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
-      .forEach(r => items.push({
-        label: (r.comments || '').slice(0, 38) || cat,
-        amount: r.chf * c.sign
-      }));
-  } else if (c.source === 'Tarjeta'){
-    tarjetaRows
-      .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear)
-      .forEach(r => items.push({
-        label: (r.descripcion || '').slice(0, 38) || cat,
-        amount: r.chf * c.sign
-      }));
-  }
-
-  if (!items.length && !adjusts.length) return '';
-
-  // Construir HTML
-  const total = items.reduce((s, i) => s + i.amount, 0);
-  const rows = items.map(i => {
-    let badge = i.isMens ? '<span class="tt-badge mens">mens</span>' : '';
-    return `<div class="tt-row"><span class="tt-label">${escapeHTML(i.label)}${badge}</span><span class="tt-amount">${fmt(i.amount)}</span></div>`;
-  }).join('');
-
-  let html = `<div class="tt-header">${escapeHTML(cat)}</div>`;
-  if (items.length){
-    html += `<div class="tt-body">${rows}</div><div class="tt-total"><span>Total</span><span>${fmt(total)}</span></div>`;
-  } else {
-    html += `<div class="tt-body"><div class="tt-empty">Sin transferencias oficiales</div></div>`;
-  }
-
-  // Sección de ajustes informativos (solo Rev)
-  if (adjusts.length){
-    const adjRows = adjusts.map(a =>
-      `<div class="tt-row"><span class="tt-label">${escapeHTML(a.label)}<span class="tt-badge adj">ajuste</span></span><span class="tt-amount">${fmt(a.amount)}</span></div>`
-    ).join('');
-    html += `<div class="tt-section-head">También vía Rev este mes (ya descontados del Esperado)</div><div class="tt-body dim">${adjRows}</div>`;
-  }
-
-  return html;
-}
-
-function renderSectionTable(section, tblId, totalId){  const tbl = document.getElementById(tblId);
+function renderSectionTable(section, tblId, totalId){
+  const tbl = document.getElementById(tblId);
   const cats = CATEGORIES.filter(c => c.section === section);
   // Filtrar las que no tienen budget ni paid
   const filtered = cats.filter(c => {
@@ -2452,15 +1919,12 @@ function renderSectionTable(section, tblId, totalId){  const tbl = document.getE
     totExp += expected;
     totPaid += paid;
 
-    // Construir desglose para tooltip (los movimientos que suman al "Pagado")
-    const tooltipHtml = paid > 0 ? buildPagadoTooltip(c.name, currentMonth) : '';
-
     const tr = document.createElement('tr');
     if (validated) tr.classList.add('validated');
     tr.innerHTML = `
       <td class="label">${escapeHTML(c.name)}</td>
       <td class="num">${fmt(expected)}</td>
-      <td class="num ${paid > 0 ? 'has-tooltip' : 'ghost'}" ${tooltipHtml ? `data-tooltip='${tooltipHtml.replace(/'/g, "&#39;")}'` : ''}>${paid > 0 ? fmt(paid) : '—'}</td>
+      <td class="num ${paid > 0 ? '' : 'ghost'}">${paid > 0 ? fmt(paid) : '—'}</td>
       <td class="num ${Math.abs(pending) > 1 ? 'dim' : 'ghost'}">${Math.abs(pending) > 1 ? fmt(pending) : '—'}</td>
       <td class="center"><div class="check-cell"><span class="check-toggle ${validated?'checked':''}" data-cat="${escapeHTML(c.name)}"></span></div></td>
     `;
@@ -2524,30 +1988,35 @@ function renderIngresos(){
     };
   });
 
-  // Mes activo = global (currentMonth)
-  const fMes = currentMonth;
+  // Setup mes filter (poblar una sola vez)
+  const mesSel = document.getElementById('ingresos-mes-filter');
+  if (!mesSel.dataset.populated){
+    mesSel.innerHTML = '<option value="">Todos los meses</option>' +
+      MESES.map(m => `<option value="${m}">${m}</option>`).join('');
+    mesSel.onchange = renderIngresos;
+    mesSel.dataset.populated = '1';
+  }
+  const fMes = mesSel.value;
 
-  // Filtrar ingresos reales: todos los movimientos BCGE POSITIVOS de la cuenta/persona activa.
-  // Antes se filtraba solo por categoría BCGE Agus / BCGE Sofi, lo que dejaba afuera
-  // ingresos positivos categorizados como Rev - Agus, Rev - Sofi, devoluciones, ventas, etc.
+  // Categoría correspondiente
+  const cat = currentIngresoPerson === 'Agus' ? 'BCGE Agus' : 'BCGE Sofi';
+
+  // Filtrar: BCGE de esa categoría con valor POSITIVO (ingreso) y que no esté borrada
   let rows = bcgeRows.filter(r =>
     r._state !== 'deleted' &&
-    (r.cuenta || '').trim() === currentIngresoPerson &&
-    r.año === currentYear &&
-    r.chf > 0 &&
-    r.mes === fMes
-  );
-  rows.sort((a, b) => MESES.indexOf(a.mes) - MESES.indexOf(b.mes));
-
-  // Stats anuales: todos los ingresos positivos reales de la cuenta/persona activa.
-  const allRowsForCat = bcgeRows.filter(r =>
-    r._state !== 'deleted' &&
-    (r.cuenta || '').trim() === currentIngresoPerson &&
+    r.categoria === cat &&
     r.año === currentYear &&
     r.chf > 0
   );
+  if (fMes) rows = rows.filter(r => r.mes === fMes);
+  rows.sort((a, b) => MESES.indexOf(a.mes) - MESES.indexOf(b.mes));
+
+  // Stats: si hay filtro de mes, total año = solo del mes; sino, todo el año
+  const allRowsForCat = bcgeRows.filter(r =>
+    r._state !== 'deleted' && r.categoria === cat && r.año === currentYear && r.chf > 0
+  );
   const totalAnual = allRowsForCat.reduce((s, r) => s + r.chf, 0);
-  const promedio = totalAnual / 12;
+  const promedio = allRowsForCat.length ? totalAnual / 12 : 0;
 
   document.getElementById('ingresos-total-anual').textContent = fmt(totalAnual);
   document.getElementById('ingresos-promedio').textContent = fmt(promedio);
@@ -2560,7 +2029,7 @@ function renderIngresos(){
   if (!rows.length){
     const tr = document.createElement('tr');
     const msg = fMes ? `Sin ingresos cargados para ${currentIngresoPerson} en ${fMes}` : `Sin ingresos cargados para ${currentIngresoPerson}`;
-    tr.innerHTML = `<td colspan="5" style="text-align:center;color:var(--ink-faint);padding:32px;font-style:italic;font-size:13px">${msg}</td>`;
+    tr.innerHTML = `<td colspan="4" style="text-align:center;color:var(--ink-faint);padding:32px;font-style:italic;font-size:13px">${msg}</td>`;
     tbody.appendChild(tr);
     return;
   }
@@ -2574,7 +2043,6 @@ function renderIngresos(){
     tr.innerHTML = `
       <td><select class="ingreso-mes" data-id="${r.id}">${monthOptions(r.mes)}</select></td>
       <td><input type="text" class="ingreso-comments" data-id="${r.id}" value="${escapeHTML(r.comments || '')}" placeholder="Sueldo, bonus, reembolso..."></td>
-      <td><select class="ingreso-categoria" data-id="${r.id}">${ingresoCategoryOptions(r.categoria)}</select></td>
       <td><input type="number" class="ingreso-chf num" data-id="${r.id}" value="${r.chf}" step="0.01"></td>
       <td class="center">
         <button class="row-action-btn" title="Borrar" onclick="deleteRow('bcge', ${r.id})">
@@ -2587,7 +2055,6 @@ function renderIngresos(){
 
   tbody.querySelectorAll('.ingreso-mes').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'mes', e.target.value));
   tbody.querySelectorAll('.ingreso-comments').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'comments', e.target.value));
-  tbody.querySelectorAll('.ingreso-categoria').forEach(el => el.onchange = e => editRowField('bcge', +e.target.dataset.id, 'categoria', e.target.value));
   tbody.querySelectorAll('.ingreso-chf').forEach(el => el.onchange = e => {
     let v = parseFloat(e.target.value) || 0;
     if (v < 0) v = Math.abs(v); // ingresos siempre positivos
@@ -2596,18 +2063,24 @@ function renderIngresos(){
 }
 
 function addIngreso(){
-  openAddModal('ingreso');
-}
-
-
-function ingresoCategoryOptions(selected){
-  // Categorías permitidas para ingresos positivos en BCGE.
-  // Incluye categorías de ingresos formales y mensualidades/reembolsos positivos que pueden aparecer en cuenta.
-  const opts = CATEGORIES
-    .filter(c => c.source === 'BCGE' || c.source === 'COMPUTED')
-    .map(c => c.name);
-  if (selected && !opts.includes(selected)) opts.unshift(selected);
-  return [...new Set(opts)].map(c => `<option value="${escapeHTML(c)}" ${c === selected ? 'selected' : ''}>${escapeHTML(c)}</option>`).join('');
+  const cat = currentIngresoPerson === 'Agus' ? 'BCGE Agus' : 'BCGE Sofi';
+  const fMes = document.getElementById('ingresos-mes-filter').value;
+  const newRow = {
+    id: nextRowId++,
+    año: currentYear,
+    mes: fMes || currentMonth,
+    chf: 0,
+    categoria: cat,
+    cuenta: currentIngresoPerson,
+    comments: '',
+    _state: 'new'
+  };
+  bcgeRows.push(newRow);
+  dirtyChanges++;
+  updatePendingBanner();
+  renderIngresos();
+  renderDashboard();
+  renderForecast();
 }
 
 function monthOptions(selected){
@@ -2631,6 +2104,15 @@ function setupGastosFilters(){
       renderGastos();
     };
   });
+
+  const mesSel = document.getElementById('gastos-mes-filter');
+  if (!mesSel.dataset.populated){
+    mesSel.innerHTML = '<option value="">Todos los meses</option>' +
+      MESES.map(m => `<option value="${m}">${m}</option>`).join('');
+    mesSel.value = currentMonth;
+    mesSel.onchange = renderGastos;
+    mesSel.dataset.populated = '1';
+  }
 
   const sourceSel = document.getElementById('gastos-source-filter');
   if (!sourceSel.dataset.populated){
@@ -2660,24 +2142,18 @@ function setupGastosFilters(){
 function renderGastos(){
   setupGastosFilters();
 
-  const fMes = currentMonth;
+  const fMes = document.getElementById('gastos-mes-filter').value;
   const fSource = document.getElementById('gastos-source-filter').value;
   const fCat = document.getElementById('gastos-cat-filter').value;
   const fSearch = (document.getElementById('gastos-search').value || '').toLowerCase();
 
   // Construir lista unificada
   // BCGE: incluir solo NEGATIVOS (gastos). Positivos son ingresos y van a otra tab.
-  // EXCEPCIÓN: 'Transferencia interna' - mostramos AMBAS filas (origen negativa, destino positiva)
   const all = [];
   bcgeRows.forEach(r => {
     if (r._state === 'deleted') return;
+    if (r.chf > 0) return; // ingreso, no gasto
     if (r.categoria === 'BCGE Agus' || r.categoria === 'BCGE Sofi') return;
-    if (r.categoria === 'Transferencia interna'){
-      // Mostramos ambas filas (origen y destino) con badge
-      all.push({...r, source: 'BCGE', isTransfer: true});
-      return;
-    }
-    if (r.chf > 0) return; // ingreso normal, no gasto
     all.push({...r, source: 'BCGE'});
   });
   tarjetaRows.forEach(r => {
@@ -2711,12 +2187,8 @@ function renderGastos(){
   });
 
   // Stats
-  // Para transferencias internas: las filas POSITIVAS no son gastos (son los recibidos), no las contamos.
-  // Las filas NEGATIVAS de transferencia tampoco son gastos reales (se compensan), pero las dejamos en el conteo
-  // visual de la lista para que se vean. Los totales solo cuentan gastos reales.
   let totBcge = 0, totTar = 0;
   filtered.forEach(r => {
-    if (r.isTransfer) return; // transferencias internas no son gastos reales
     if (r.source === 'BCGE') totBcge += Math.abs(r.chf);
     else totTar += r.chf;
   });
@@ -2773,17 +2245,9 @@ function renderGastos(){
       </td>
       <td>${cuentaCell}</td>
       <td><select class="gasto-mes" data-id="${r.id}" data-source="${r.source}">${monthOptions(r.mes)}</select></td>
-      <td>
-        ${r.isTransfer ? `<span class="transfer-badge">${r.chf > 0 ? '↓ recibido' : '↑ enviado'}</span>` : ''}
-        <input type="text" class="gasto-desc" data-id="${r.id}" data-source="${r.source}" value="${escapeHTML(descField)}" placeholder="Descripción...">
-      </td>
+      <td><input type="text" class="gasto-desc" data-id="${r.id}" data-source="${r.source}" value="${escapeHTML(descField)}" placeholder="Descripción..."></td>
       <td><select class="gasto-cat" data-id="${r.id}" data-source="${r.source}">${catOptionsHtml(r.categoria, r.source)}</select></td>
       <td><input type="number" class="gasto-chf num" data-id="${r.id}" data-source="${r.source}" value="${r.source === 'BCGE' ? Math.abs(r.chf) : r.chf}" step="0.01"></td>
-      <td class="center">
-        ${(r.source === 'BCGE' && (r.categoria === 'Rev - Agus' || r.categoria === 'Rev - Sofi'))
-          ? `<input type="checkbox" class="gasto-mensualidad" data-id="${r.id}" data-source="${r.source}" ${r.esMensualidad ? 'checked' : ''} title="Marcar como mensualidad oficial (transferencia mensual a Revolut)">`
-          : `<span style="color:var(--ink-ghost);font-size:11px">—</span>`}
-      </td>
       <td class="center">
         <button class="row-action-btn" title="Borrar" onclick="deleteRow('${tableType}', ${r.id})">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -2810,334 +2274,28 @@ function renderGastos(){
     if (src === 'bcge' && val > 0) val = -val;
     editRowField(src, +e.target.dataset.id, 'chf', val);
   });
-  tbody.querySelectorAll('.gasto-mensualidad').forEach(el => el.onchange = e => {
-    editRowField('bcge', +e.target.dataset.id, 'esMensualidad', e.target.checked);
-  });
 }
 
 function addGasto(){
-  openAddModal('gasto');
-}
-
-// =============================================================
-// MODAL AGREGAR MOVIMIENTO
-// =============================================================
-function openAddModal(context){
-  // context: 'ingreso' o 'gasto'
-  addModalContext = context;
-
-  const isIngreso = context === 'ingreso';
-  document.getElementById('add-modal-title').textContent = isIngreso ? 'Nuevo ingreso' : 'Nuevo gasto';
-  document.getElementById('add-modal-subtitle').textContent = isIngreso
-    ? 'Plata que entró a la cuenta'
-    : 'Movimiento que sale de la cuenta';
-
-  // Poblar mes (default = currentMonth)
-  const mesSel = document.getElementById('add-mes');
-  mesSel.innerHTML = MESES.map(m => `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${m}</option>`).join('');
-
-  // Cuenta default
-  const cuentaSel = document.getElementById('add-cuenta');
-  if (isIngreso){
-    cuentaSel.value = currentIngresoPerson || 'Agus';
-  } else {
-    cuentaSel.value = currentGastoPerson || 'Agus';
-  }
-
-  // Fuente: en Ingresos siempre BCGE (oculto), en Gastos elegible
-  const fuenteRow = document.getElementById('add-fuente-row');
-  const fuenteSel = document.getElementById('add-fuente');
-  if (isIngreso){
-    fuenteSel.value = 'BCGE';
-    fuenteRow.style.display = 'none';
-  } else {
-    fuenteRow.style.display = '';
-    fuenteSel.value = 'BCGE';
-  }
-  fuenteSel.onchange = updateAddModalCategorias;
-
-  // Cuenta visible: en Tarjeta no aplica (siempre Agus)
-  cuentaSel.onchange = () => {
-    syncTransferDestino();
-    updateAddModalCategorias();
+  const fMes = document.getElementById('gastos-mes-filter').value;
+  const defaultCat = CATEGORIES.find(c => c.source === 'BCGE' && c.section !== 'INGRESOS');
+  const defaultCuenta = currentGastoPerson || 'Agus';
+  const newRow = {
+    id: nextRowId++,
+    año: currentYear,
+    mes: fMes || currentMonth,
+    chf: 0,
+    categoria: defaultCat.name,
+    cuenta: defaultCuenta,
+    comments: '',
+    _state: 'new'
   };
-
-  updateAddModalCategorias();
-
-  // Resetear campos
-  document.getElementById('add-descripcion').value = '';
-  document.getElementById('add-monto').value = '';
-  document.getElementById('add-mensualidad').checked = false;
-
-  document.getElementById('add-modal').classList.remove('hidden');
-
-  // Focus en monto (lo más usado)
-  setTimeout(() => document.getElementById('add-monto').focus(), 100);
-
-  document.addEventListener('keydown', addModalEscHandler);
-}
-
-function updateAddModalCategorias(){
-  const isIngreso = addModalContext === 'ingreso';
-  const fuente = document.getElementById('add-fuente').value;
-  const catSel = document.getElementById('add-categoria');
-  const cuentaRow = document.getElementById('add-cuenta-row');
-  const mensRow = document.getElementById('add-mensualidad-row');
-
-  // Categorías disponibles
-  let cats;
-  if (isIngreso){
-    // Ingresos: por convención, categoría = BCGE Agus / BCGE Sofi (cualquier positivo cuenta como ingreso, pero por defecto sugerimos esta)
-    cats = CATEGORIES.filter(c => c.section === 'INGRESOS').map(c => c.name);
-  } else if (fuente === 'BCGE'){
-    // Gastos BCGE: incluye categorías BCGE + COMPUTED (Rev - Agus, Rev - Sofi son COMPUTED pero se cargan en BCGE)
-    cats = CATEGORIES.filter(c => c.section !== 'INGRESOS' && (c.source === 'BCGE' || c.source === 'COMPUTED')).map(c => c.name);
-  } else {
-    cats = CATEGORIES.filter(c => c.source === 'Tarjeta').map(c => c.name);
-  }
-  catSel.innerHTML = cats.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
-  catSel.onchange = updateAddModalMensualidadVisibility;
-
-  // Cuenta: solo aplica para BCGE
-  if (fuente === 'Tarjeta'){
-    cuentaRow.style.display = 'none';
-  } else {
-    cuentaRow.style.display = '';
-  }
-
-  updateAddModalMensualidadVisibility();
-}
-
-function updateAddModalMensualidadVisibility(){
-  const cat = document.getElementById('add-categoria').value;
-  const mensRow = document.getElementById('add-mensualidad-row');
-  const transferRow = document.getElementById('add-transfer-destino-row');
-  const cuentaLabel = document.querySelector('#add-cuenta-row label');
-
-  // Toggle "Es mensualidad" - solo Rev
-  if (cat === 'Rev - Agus' || cat === 'Rev - Sofi'){
-    mensRow.style.display = '';
-  } else {
-    mensRow.style.display = 'none';
-    document.getElementById('add-mensualidad').checked = false;
-  }
-
-  // Cuenta destino - solo Transferencia interna
-  if (cat === 'Transferencia interna'){
-    if (transferRow) transferRow.style.display = '';
-    if (cuentaLabel) cuentaLabel.textContent = 'Desde cuenta';
-    // Forzar destino distinto al origen
-    syncTransferDestino();
-  } else {
-    if (transferRow) transferRow.style.display = 'none';
-    if (cuentaLabel) cuentaLabel.textContent = 'Cuenta';
-  }
-}
-
-function syncTransferDestino(){
-  const origen = document.getElementById('add-cuenta').value;
-  const destinoSel = document.getElementById('add-cuenta-destino');
-  if (!destinoSel) return;
-  // Destino es siempre la otra cuenta
-  destinoSel.value = origen === 'Agus' ? 'Sofi' : 'Agus';
-}
-
-function closeAddModal(event){
-  if (event && event.target && event.target.id !== 'add-modal' && !event.target.classList.contains('modal-close') && !event.target.closest('.modal-close')){
-    return;
-  }
-  document.getElementById('add-modal').classList.add('hidden');
-  document.removeEventListener('keydown', addModalEscHandler);
-}
-
-function addModalEscHandler(e){
-  if (e.key === 'Escape') closeAddModal();
-}
-
-function submitAddForm(){
-  const isIngreso = addModalContext === 'ingreso';
-  const fuente = document.getElementById('add-fuente').value;
-  const mes = document.getElementById('add-mes').value;
-  const cuenta = document.getElementById('add-cuenta').value;
-  const categoria = document.getElementById('add-categoria').value;
-  const descripcion = document.getElementById('add-descripcion').value.trim();
-  let monto = parseFloat(document.getElementById('add-monto').value) || 0;
-  const esMensualidad = document.getElementById('add-mensualidad').checked;
-
-  if (!monto){
-    showToast('Ingresá un monto', 'error');
-    return;
-  }
-  if (!categoria){
-    showToast('Elegí una categoría', 'error');
-    return;
-  }
-
-  // CASO ESPECIAL: Transferencia interna entre cuentas
-  // Se generan 2 filas opuestas automáticamente: gasto en origen, ingreso en destino
-  if (categoria === 'Transferencia interna'){
-    const destino = document.getElementById('add-cuenta-destino').value;
-    if (destino === cuenta){
-      showToast('La cuenta origen y destino deben ser distintas', 'error');
-      return;
-    }
-    const monto_abs = Math.abs(monto);
-    const desc = descripcion || `transfer ${cuenta} → ${destino}`;
-    // Fila 1: gasto en cuenta origen
-    bcgeRows.push({
-      id: nextRowId++,
-      año: currentYear,
-      mes,
-      chf: -monto_abs,
-      categoria: 'Transferencia interna',
-      cuenta,
-      comments: desc,
-      esMensualidad: false,
-      _state: 'new'
-    });
-    // Fila 2: ingreso en cuenta destino
-    bcgeRows.push({
-      id: nextRowId++,
-      año: currentYear,
-      mes,
-      chf: monto_abs,
-      categoria: 'Transferencia interna',
-      cuenta: destino,
-      comments: desc,
-      esMensualidad: false,
-      _state: 'new'
-    });
-    dirtyChanges += 2;
-    updatePendingBanner();
-    renderIngresos();
-    renderGastos();
-    renderDashboard();
-    renderForecast();
-    closeAddModal();
-    showToast(`Transferencia ${cuenta}→${destino} registrada (2 filas)`, 'success');
-    return;
-  }
-
-  // Normalizar signo
-  // Ingresos: siempre positivo
-  // Gastos BCGE: siempre negativo
-  // Gastos Tarjeta: siempre positivo (como están en el sheet)
-  if (isIngreso){
-    monto = Math.abs(monto);
-  } else if (fuente === 'BCGE'){
-    monto = -Math.abs(monto);
-  } else {
-    monto = Math.abs(monto);
-  }
-
-  if (fuente === 'BCGE'){
-    const newRow = {
-      id: nextRowId++,
-      año: currentYear,
-      mes,
-      chf: monto,
-      categoria,
-      cuenta,
-      comments: descripcion,
-      esMensualidad,
-      _state: 'new'
-    };
-    bcgeRows.push(newRow);
-  } else {
-    // Tarjeta - cuenta siempre Agus por sistema
-    const newRow = {
-      id: nextRowId++,
-      año: currentYear,
-      mes,
-      fecha: '',
-      descripcion: descripcion,
-      chf: monto,
-      categoria,
-      comments: '',
-      _state: 'new'
-    };
-    tarjetaRows.push(newRow);
-  }
-
+  bcgeRows.push(newRow);
   dirtyChanges++;
   updatePendingBanner();
-  renderIngresos();
   renderGastos();
   renderDashboard();
   renderForecast();
-
-  closeAddModal();
-  showToast(isIngreso ? 'Ingreso agregado' : 'Gasto agregado', 'success');
-}
-
-// =============================================================
-// COMENTARIOS DEL MES
-// =============================================================
-function renderComments(){
-  const list = document.getElementById('comments-list');
-  if (!list) return;
-
-  const monthComments = commentsData
-    .filter(c => c._state !== 'deleted' && c.mes === currentMonth && c.año === currentYear)
-    .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
-
-  if (!monthComments.length){
-    list.innerHTML = `<div class="comments-empty">Sin comentarios para ${currentMonth}. Agregá uno abajo.</div>`;
-    return;
-  }
-
-  list.innerHTML = monthComments.map(c => {
-    const autorLower = (c.autor || '').toLowerCase();
-    const autorClass = autorLower.includes('agus') ? 'agus' : (autorLower.includes('sofi') ? 'sofi' : '');
-    return `
-      <div class="comment-item">
-        <span class="comment-author ${autorClass}">${escapeHTML(c.autor || '?')}</span>
-        <div style="flex:1;min-width:0">
-          <div class="comment-body">${escapeHTML(c.texto)}</div>
-          <div class="comment-meta">${escapeHTML(c.fecha || '')}</div>
-        </div>
-        <button class="comment-delete" onclick="deleteComment(${c.id})" title="Borrar">×</button>
-      </div>
-    `;
-  }).join('');
-}
-
-function addComment(){
-  const input = document.getElementById('comment-input');
-  const texto = input.value.trim();
-  if (!texto){
-    showToast('Escribí algo primero', 'error');
-    return;
-  }
-  // Autor = userEmail (si lo tenemos) o fallback
-  const autor = (userEmail && userEmail.split('@')[0]) || 'Usuario';
-  const fecha = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  commentsData.push({
-    id: nextRowId++,
-    mes: currentMonth,
-    año: currentYear,
-    autor,
-    texto,
-    fecha,
-    _state: 'new'
-  });
-  input.value = '';
-  dirtyChanges++;
-  updatePendingBanner();
-  renderComments();
-}
-
-function deleteComment(id){
-  const c = commentsData.find(x => x.id === id);
-  if (!c) return;
-  if (c._state === 'new'){
-    commentsData = commentsData.filter(x => x.id !== id);
-  } else {
-    c._state = 'deleted';
-  }
-  dirtyChanges++;
-  updatePendingBanner();
-  renderComments();
 }
 
 function moveRowToOtherSource(id, fromSource, toSource){
@@ -3176,7 +2334,6 @@ function moveRowToOtherSource(id, fromSource, toSource){
     descripcion: oldRow.descripcion || oldRow.comments || '',
     comments: oldRow.comments || '',
     cuenta: oldRow.cuenta || '',
-    esMensualidad: toSource === 'BCGE' ? !!oldRow.esMensualidad : false,
     _state: 'new'
   };
   toArr.push(newRow);
@@ -3349,7 +2506,7 @@ function renderForecast(){
   let tIng=0, tGas=0, tMens=0, tAho=0, tOtros=0, tBal=0;
 
   MESES.forEach(mes => {
-    const ing = totalBySection('INGRESOS', mes);
+    const ing = projectedIncomeForMonth(mes);
     const gas = totalBySection('FIJOS', mes) + totalBySection('TARJETA', mes) +
                 totalBySection('ANUALES', mes) + totalBySection('OTROS', mes);
     const mens = totalBySection('MENSUALIDADES', mes);
@@ -3436,9 +2593,9 @@ async function saveToSheets(){
 
   try {
     // ========= 1. Preparar BCGE =========
-    const bcgeData = [['Año pago', 'Mes pago', 'CHF', 'Categoria', 'BCGE cuenta', 'Comments', 'Es mensualidad']];
+    const bcgeData = [['Año pago', 'Mes pago', 'CHF', 'Categoria', 'BCGE cuenta', 'Comments', 'Colonne1']];
     bcgeRows.filter(r => r._state !== 'deleted').forEach(r => {
-      bcgeData.push([r.año || '', r.mes, r.chf, r.categoria, r.cuenta || '', r.comments || '', r.esMensualidad ? 1 : 0]);
+      bcgeData.push([r.año || '', r.mes, r.chf, r.categoria, r.cuenta || '', r.comments || '', '']);
     });
 
     // ========= 2. Preparar Tarjeta =========
@@ -3503,30 +2660,19 @@ async function saveToSheets(){
 
     // ========= 4. Ejecutar todos los updates =========
     // Estrategia: 
-    // - Para BCGE/Tarjeta/Comentarios: clear sheet + write nuevos datos completos
+    // - Para BCGE/Tarjeta: clear sheet + write nuevos datos completos
     // - Para Budgets: cell-level batchUpdate (mantenemos formato y secciones)
 
-    // Construir payload de Comentarios
-    const commentsArr = commentsData.filter(c => c._state !== 'deleted');
-    const commentsPayload = [['Mes', 'Año', 'Autor', 'Texto', 'Fecha']];
-    commentsArr.forEach(c => {
-      commentsPayload.push([c.mes, c.año, c.autor, c.texto, c.fecha || '']);
-    });
-
-    // Asegurar que la hoja Comentarios exista (la creamos si no)
-    await ensureSheetExists('Comentarios');
-
-    // Clear BCGE, Tarjeta, Comentarios
+    // Clear BCGE y Tarjeta
     await gapi.client.sheets.spreadsheets.values.batchClear({
       spreadsheetId: SHEET_ID,
-      resource: { ranges: ['BCGE!A:Z', 'Tarjeta!A:Z', 'Comentarios!A:E'] }
+      resource: { ranges: ['BCGE!A:Z', 'Tarjeta!A:Z'] }
     });
 
-    // Write BCGE, Tarjeta, Comentarios + Budget updates (batchUpdate)
+    // Write BCGE y Tarjeta + Budget updates (batchUpdate)
     const data = [
       { range: 'BCGE!A1', values: bcgeData },
       { range: 'Tarjeta!A1', values: tarjetaData },
-      { range: 'Comentarios!A1', values: commentsPayload },
       ...budgetUpdates,
     ];
 
@@ -3541,7 +2687,6 @@ async function saveToSheets(){
     // Limpiar estados
     bcgeRows = bcgeRows.filter(r => r._state !== 'deleted').map(r => ({...r, _state: 'clean'}));
     tarjetaRows = tarjetaRows.filter(r => r._state !== 'deleted').map(r => ({...r, _state: 'clean'}));
-    commentsData = commentsData.filter(c => c._state !== 'deleted').map(c => ({...c, _state: 'clean'}));
 
     dirtyChanges = 0;
     updatePendingBanner();
@@ -3549,35 +2694,10 @@ async function saveToSheets(){
 
     renderIngresos();
     renderGastos();
-    renderComments();
   } catch(err){
     console.error('Error guardando:', err);
     const msg = err?.result?.error?.message || err.message || 'desconocido';
     showToast('Error guardando: ' + msg, 'error');
-  }
-}
-
-// Crea la hoja si no existe (idempotente)
-async function ensureSheetExists(sheetName){
-  try {
-    const meta = await gapi.client.sheets.spreadsheets.get({
-      spreadsheetId: SHEET_ID,
-      fields: 'sheets.properties.title'
-    });
-    const exists = (meta.result.sheets || []).some(s => s.properties.title === sheetName);
-    if (exists) return;
-    // Crear
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: SHEET_ID,
-      resource: {
-        requests: [{
-          addSheet: { properties: { title: sheetName } }
-        }]
-      }
-    });
-    console.log(`[ensureSheetExists] Hoja "${sheetName}" creada`);
-  } catch(err){
-    console.warn(`[ensureSheetExists] Error con "${sheetName}":`, err);
   }
 }
 
@@ -3591,57 +2711,6 @@ function colNumToLetter(n){
   }
   return s;
 }
-
-// =============================================================
-// TOOLTIP HOVER en celdas con data-tooltip
-// =============================================================
-(function setupTooltips(){
-  const tt = document.getElementById('hover-tooltip');
-  if (!tt) return;
-
-  document.addEventListener('mouseover', e => {
-    const el = e.target.closest('[data-tooltip]');
-    if (!el) return;
-    const html = el.getAttribute('data-tooltip');
-    if (!html) return;
-    tt.innerHTML = html;
-    tt.classList.add('visible');
-    positionTooltip(el);
-  });
-
-  document.addEventListener('mouseout', e => {
-    const el = e.target.closest('[data-tooltip]');
-    if (!el) return;
-    // Solo ocultar si salimos completamente
-    if (e.relatedTarget && el.contains(e.relatedTarget)) return;
-    tt.classList.remove('visible');
-  });
-
-  document.addEventListener('mousemove', e => {
-    if (!tt.classList.contains('visible')) return;
-    const el = e.target.closest('[data-tooltip]');
-    if (el) positionTooltip(el);
-  });
-
-  function positionTooltip(el){
-    const rect = el.getBoundingClientRect();
-    const ttRect = tt.getBoundingClientRect();
-    // Por defecto: centrado horizontalmente sobre el elemento
-    let left = rect.left + rect.width/2 - ttRect.width/2;
-    let top = rect.top - ttRect.height - 8;
-    // Si no entra arriba, mostrar abajo
-    if (top < 8){
-      top = rect.bottom + 8;
-    }
-    // Clampar horizontalmente
-    if (left < 8) left = 8;
-    if (left + ttRect.width > window.innerWidth - 8){
-      left = window.innerWidth - ttRect.width - 8;
-    }
-    tt.style.left = left + 'px';
-    tt.style.top = top + 'px';
-  }
-})();
 
 function showToast(msg, type){
   const t = document.getElementById('toast');
