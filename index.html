@@ -715,6 +715,42 @@ button,select,input{font-family:inherit;font-size:inherit}
   vertical-align:middle;
 }
 
+/* BANNER IMPOSITIVO en Forecast */
+.tax-banner{
+  margin-bottom:18px;
+  padding:18px 22px;
+  background:linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 100%);
+  border:1px solid #d1fae5;
+}
+.tax-banner-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+  gap:18px;
+}
+.tax-banner-grid > div{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.tax-banner-grid .tb-label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  color:var(--ink-faint);
+  font-weight:500;
+}
+.tax-banner-grid .tb-value{
+  font-family:'Geist Mono',monospace;
+  font-variant-numeric:tabular-nums;
+  font-size:18px;
+  font-weight:600;
+  color:var(--ink);
+}
+.tax-banner-grid .tb-value.strong{
+  color:#059669;
+  font-size:20px;
+}
+
 /* TOOLTIP en celdas Pagado */
 .has-tooltip{
   cursor:help;
@@ -1160,7 +1196,7 @@ button,select,input{font-family:inherit;font-size:inherit}
 
     <div class="section-summary">
       <div class="item">
-        <span class="label">Total año</span>
+        <span class="label">Total del mes</span>
         <span class="value green" id="ingresos-total-anual">—</span>
       </div>
       <div class="item">
@@ -1281,6 +1317,7 @@ button,select,input{font-family:inherit;font-size:inherit}
       <h2>Forecast anual</h2>
       <span class="meta">balance estimado: usa Esperado por categoría</span>
     </div>
+    <div class="card tax-banner" id="forecast-tax-banner"></div>
     <div class="chart-wrap"><canvas id="chart-balance"></canvas></div>
     <div class="card"><table class="tbl" id="tbl-forecast"></table></div>
   </div>
@@ -1396,6 +1433,34 @@ const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 // Categorías - debe coincidir EXACTAMENTE con el Excel
+// =============================================================
+// BAREMO IMPÔT À LA SOURCE GENÈVE 2026 - Columna C0
+// (Casado + ambos cónyuges trabajan + 0 hijos)
+// Cada tramo: [min_anual, max_anual, taux_C0_pct]
+// Fuente: Barèmes 2026 impôt source - République et Canton de Genève
+// =============================================================
+const TAUX_C0 = [[0,29399,0.0],[29400,31199,0.0],[31200,31799,0.02],[31800,32399,0.21],[32400,32999,0.41],[33000,33599,0.59],[33600,34199,0.77],[34200,34799,0.94],[34800,35399,1.1],[35400,35999,1.26],[36000,36599,1.43],[36600,37199,1.6],[37200,37799,1.81],[37800,38399,1.98],[38400,38999,2.14],[39000,39599,2.32],[39600,40199,2.49],[40200,40799,2.66],[40800,41399,2.83],[41400,41999,3.0],[42000,42599,3.18],[42600,43199,3.35],[43200,43799,3.51],[43800,44399,3.68],[44400,44999,3.85],[45000,45599,4.02],[45600,46199,4.19],[46200,46799,4.35],[46800,47399,4.51],[47400,47999,4.66],[48000,48599,4.81],[48600,49199,4.96],[49200,49799,5.1],[49800,50399,5.24],[50400,50999,5.39],[51000,51599,5.53],[51600,52199,5.68],[52200,52799,5.82],[52800,53399,5.96],[53400,53999,6.1],[54000,54599,6.23],[54600,55199,6.37],[55200,55799,6.5],[55800,56399,6.64],[56400,56999,6.78],[57000,57599,6.92],[57600,58199,7.06],[58200,58799,7.2],[58800,59399,7.34],[59400,59999,7.47],[60000,60599,7.6],[60600,61199,7.72],[61200,61799,7.85],[61800,62399,7.98],[62400,62999,8.1],[63000,63599,8.23],[63600,64199,8.35],[64200,64799,8.47],[64800,65399,8.59],[65400,65999,8.71],[66000,66599,8.83],[66600,67199,8.95],[67200,67799,9.07],[67800,68399,9.19],[68400,68999,9.3],[69000,69599,9.42],[69600,70199,9.53],[70200,70799,9.64],[70800,71399,9.71],[71400,71999,9.77],[72000,72599,9.84],[72600,73199,9.9],[73200,73799,9.96],[73800,74399,10.02],[74400,74999,10.09],[75000,75599,10.15],[75600,76199,10.21],[76200,76799,10.27],[76800,77399,10.33],[77400,77999,10.39],[78000,78599,10.45],[78600,79199,10.51],[79200,79799,10.57],[79800,80399,10.63],[80400,80999,10.69],[81000,81599,10.75],[81600,82199,10.81],[82200,82799,10.86],[82800,83399,10.92],[83400,83999,10.98],[84000,84599,11.03],[84600,85199,11.09],[85200,85799,11.14],[85800,86399,11.2],[86400,86999,11.25],[87000,87599,11.31],[87600,88199,11.36],[88200,88799,11.42],[88800,89399,11.47],[89400,89999,11.52],[90000,90599,11.57],[90600,91199,11.63],[91200,91799,11.68],[91800,92399,11.73],[92400,92999,11.78],[93000,93599,11.83],[93600,94199,11.88],[94200,94799,11.93],[94800,95399,11.98],[95400,95999,12.03],[96000,96599,12.08],[96600,97199,12.13],[97200,97799,12.18],[97800,98399,12.23],[98400,98999,12.28],[99000,99599,12.33],[99600,100199,12.38],[100200,100799,12.43],[100800,101399,12.48],[101400,101999,12.53],[102000,102599,12.57],[102600,103199,12.62],[103200,103799,12.67],[103800,104399,12.71],[104400,104999,12.76],[105000,105599,12.81],[105600,106199,12.85],[106200,106799,12.9],[106800,107399,12.94],[107400,107999,12.99],[108000,108599,13.03],[108600,109199,13.07],[109200,109799,13.12],[109800,110399,13.16],[110400,110999,13.21],[111000,111599,13.26],[111600,112199,13.3],[112200,112799,13.35],[112800,113399,13.39],[113400,113999,13.43],[114000,114599,13.48],[114600,115199,13.52],[115200,115799,13.56],[115800,116399,13.61],[116400,116999,13.65],[117000,117599,13.69],[117600,118199,13.73],[118200,118799,13.78],[118800,119399,13.82],[119400,119999,13.86],[120000,120599,13.9],[120600,121199,13.94],[121200,121799,13.98],[121800,122399,14.02],[122400,122999,14.06],[123000,123599,14.11],[123600,124199,14.15],[124200,124799,14.19],[124800,125399,14.23],[125400,125999,14.27],[126000,126599,14.31],[126600,127199,14.35],[127200,127799,14.39],[127800,128399,14.43],[128400,128999,14.47],[129000,129599,14.51],[129600,130199,14.55],[130200,130799,14.59],[130800,131399,14.63],[131400,131999,14.67],[132000,132599,14.72],[132600,133199,14.76],[133200,133799,14.81],[133800,134399,14.85],[134400,134999,14.9],[135000,135599,14.95],[135600,136199,14.99],[136200,136799,15.03],[136800,137399,15.08],[137400,137999,15.12],[138000,138599,15.17],[138600,139199,15.22],[139200,139799,15.26],[139800,140399,15.3],[140400,140999,15.35],[141000,141599,15.39],[141600,142199,15.44],[142200,142799,15.49],[142800,143399,15.53],[143400,143999,15.58],[144000,144599,15.62],[144600,145199,15.67],[145200,145799,15.71],[145800,146399,15.77],[146400,146999,15.81],[147000,147599,15.86],[147600,148199,15.91],[148200,148799,15.96],[148800,149399,16.01],[149400,149999,16.06],[150000,150599,16.11],[150600,151199,16.17],[151200,151799,16.22],[151800,152399,16.27],[152400,152999,16.31],[153000,153599,16.37],[153600,154199,16.41],[154200,154799,16.46],[154800,155399,16.51],[155400,155999,16.56],[156000,156599,16.61],[156600,157199,16.65],[157200,157799,16.71],[157800,158399,16.75],[158400,158999,16.8],[159000,159599,16.85],[159600,160199,16.89],[160200,160799,16.94],[160800,161399,16.98],[161400,161999,17.03],[162000,162599,17.08],[162600,163199,17.12],[163200,163799,17.17],[163800,164399,17.21],[164400,164999,17.25],[165000,165599,17.3],[165600,166199,17.34],[166200,166799,17.39],[166800,167399,17.43],[167400,167999,17.48],[168000,168599,17.52],[168600,169199,17.56],[169200,169799,17.61],[169800,170399,17.65],[170400,170999,17.69],[171000,171599,17.73],[171600,172199,17.77],[172200,172799,17.81],[172800,173399,17.85],[173400,173999,17.9],[174000,174599,17.94],[174600,175199,17.98],[175200,175799,18.02],[175800,176399,18.06],[176400,176999,18.1],[177000,177599,18.14],[177600,178199,18.18],[178200,178799,18.22],[178800,179399,18.26],[179400,179999,18.29],[180000,180599,18.34],[180600,181199,18.37],[181200,181799,18.41],[181800,182399,18.45],[182400,182999,18.49],[183000,183599,18.52],[183600,184199,18.56],[184200,184799,18.6],[184800,185399,18.64],[185400,185999,18.67],[186000,186599,18.71],[186600,187199,18.75],[187200,187799,18.78],[187800,188399,18.83],[188400,188999,18.86],[189000,189599,18.89],[189600,190199,18.93],[190200,190799,18.97],[190800,191399,19.0],[191400,191999,19.04],[192000,192599,19.07],[192600,193199,19.11],[193200,193799,19.14],[193800,194399,19.17],[194400,194999,19.21],[195000,195599,19.25],[195600,196199,19.28],[196200,196799,19.32],[196800,197399,19.35],[197400,197999,19.38],[198000,198599,19.41],[198600,199199,19.45],[199200,199799,19.48],[199800,200399,19.51],[200400,200999,19.55],[201000,201599,19.58],[201600,202199,19.61],[202200,202799,19.64],[202800,203399,19.68],[203400,203999,19.71],[204000,204599,19.74],[204600,205199,19.78],[205200,205799,19.81],[205800,206399,19.84],[206400,206999,19.87],[207000,207599,19.9],[207600,208199,19.93],[208200,208799,19.96],[208800,209399,19.99],[209400,209999,20.02],[210000,210599,20.05],[210600,211199,20.09],[211200,211799,20.12],[211800,212399,20.14],[212400,212999,20.17],[213000,213599,20.21],[213600,214199,20.24],[214200,214799,20.26],[214800,215399,20.3],[215400,215999,20.32],[216000,216599,20.35],[216600,217199,20.38],[217200,217799,20.41],[217800,218399,20.44],[218400,218999,20.47],[219000,219599,20.5],[219600,220199,20.53],[220200,220799,20.55],[220800,221399,20.58],[221400,221999,20.61],[222000,222599,20.64],[222600,223199,20.66],[223200,223799,20.7],[223800,224399,20.72],[224400,224999,20.75],[225000,225599,20.78],[225600,226199,20.8],[226200,226799,20.83],[226800,227399,20.86],[227400,227999,20.89],[228000,228599,20.91],[228600,229199,20.94],[229200,229799,20.97],[229800,230399,20.99],[230400,230999,21.02],[231000,231599,21.04],[231600,232199,21.07],[232200,232799,21.1],[232800,233399,21.12],[233400,233999,21.15],[234000,234599,21.17],[234600,235199,21.2],[235200,235799,21.22],[235800,236999,21.26],[237000,238199,21.31],[238200,239399,21.36],[239400,240599,21.41],[240600,241799,21.46],[241800,242999,21.51],[243000,244199,21.56],[244200,245399,21.6],[245400,246599,21.66],[246600,247799,21.71],[247800,248999,21.76],[249000,250199,21.81],[250200,251399,21.86],[251400,252599,21.91],[252600,253799,21.96],[253800,254999,22.01],[255000,256199,22.06],[256200,257399,22.11],[257400,258599,22.16],[258600,259799,22.2],[259800,260999,22.25],[261000,262199,22.3],[262200,263399,22.35],[263400,264599,22.4],[264600,265799,22.44],[265800,266999,22.49],[267000,268199,22.53],[268200,269399,22.58],[269400,270599,22.62],[270600,271799,22.67],[271800,272999,22.71],[273000,274199,22.75],[274200,275399,22.8],[275400,276599,22.84],[276600,277799,22.88],[277800,278999,22.93],[279000,280199,22.97],[280200,281399,23.01],[281400,282599,23.05],[282600,283799,23.09],[283800,284999,23.14],[285000,286199,23.17],[286200,287399,23.22],[287400,288599,23.25],[288600,289799,23.3],[289800,290999,23.34],[291000,292199,23.37],[292200,293399,23.41],[293400,294599,23.45],[294600,295799,23.49],[295800,296999,23.53],[297000,298199,23.57],[298200,299399,23.61],[299400,300599,23.64],[300600,301799,23.68],[301800,302999,23.72],[303000,304199,23.75],[304200,305399,23.79],[305400,306599,23.83],[306600,307799,23.86],[307800,308999,23.9],[309000,310199,23.93],[310200,311399,23.97],[311400,312599,24.0],[312600,313799,24.04],[313800,314999,24.07],[315000,316199,24.11],[316200,317399,24.14],[317400,318599,24.18],[318600,319799,24.21],[319800,320999,24.24]];
+
+// Devuelve el % de impuesto C0 según el ingreso anual.
+// Si el ingreso supera el último tramo, satura al último valor.
+function getTauxC0(ingresoAnual){
+  if (ingresoAnual <= 0) return 0;
+  for (let i = 0; i < TAUX_C0.length; i++){
+    const [mn, mx, pct] = TAUX_C0[i];
+    if (ingresoAnual >= mn && ingresoAnual <= mx) return pct;
+  }
+  // Por encima del último tramo: usar el último valor (saturación)
+  return TAUX_C0[TAUX_C0.length - 1][2];
+}
+
+// Devuelve { pct, impuestoAnual, ahorroMensual } según ingreso anual proyectado.
+function calcImpuesto(ingresoAnual){
+  const pct = getTauxC0(ingresoAnual);
+  const impuestoAnual = ingresoAnual * pct / 100;
+  const ahorroMensual = impuestoAnual / 12;
+  return { pct, impuestoAnual, ahorroMensual };
+}
+
 const CATEGORIES = [
   {section:'INGRESOS', name:'BCGE Agus', source:'BCGE', sign:1},
   {section:'INGRESOS', name:'BCGE Sofi', source:'BCGE', sign:1},
@@ -2546,7 +2611,9 @@ function renderIngresos(){
   );
   rows.sort((a, b) => MESES.indexOf(a.mes) - MESES.indexOf(b.mes));
 
-  // Stats anuales: todos los ingresos positivos reales de la cuenta/persona activa.
+  // Stats:
+  //   Total del mes = ingresos positivos del mes seleccionado
+  //   Promedio mensual = total del año / meses con datos cargados (no /12)
   const allRowsForCat = bcgeRows.filter(r =>
     r._state !== 'deleted' &&
     (r.cuenta || '').trim() === currentIngresoPerson &&
@@ -2554,9 +2621,16 @@ function renderIngresos(){
     r.chf > 0
   );
   const totalAnual = allRowsForCat.reduce((s, r) => s + r.chf, 0);
-  const promedio = totalAnual / 12;
+  const totalDelMes = rows.reduce((s, r) => s + r.chf, 0);
+  // Meses transcurridos = índice del último mes con ingresos cargados (1-12)
+  let mesesConDatos = 0;
+  MESES.forEach((m, idx) => {
+    if (allRowsForCat.some(r => r.mes === m)) mesesConDatos = Math.max(mesesConDatos, idx + 1);
+  });
+  const divisor = Math.max(1, mesesConDatos);
+  const promedio = totalAnual / divisor;
 
-  document.getElementById('ingresos-total-anual').textContent = fmt(totalAnual);
+  document.getElementById('ingresos-total-anual').textContent = fmt(totalDelMes);
   document.getElementById('ingresos-promedio').textContent = fmt(promedio);
   document.getElementById('ingresos-count').textContent = rows.length;
 
@@ -3340,36 +3414,82 @@ function renderBudgetsEditor(){
 // FORECAST
 // =============================================================
 function renderForecast(){
+  // === 1) Calcular ingreso anual familiar proyectado ===
+  // Usa sueldos reales (BCGE Agus + BCGE Sofi positivos) cargados +
+  // budget de esas mismas categorías para los meses sin datos cargados.
+  let ingresoAnualProyectado = 0;
+  ['BCGE Agus', 'BCGE Sofi'].forEach(cat => {
+    MESES.forEach(mes => {
+      // Real (BCGE positivos cargados para esa cat/mes)
+      const real = bcgeRows
+        .filter(r => r._state !== 'deleted' && r.categoria === cat && r.mes === mes && r.año === currentYear && r.chf > 0)
+        .reduce((s, r) => s + r.chf, 0);
+      if (real > 0){
+        ingresoAnualProyectado += real;
+      } else {
+        // Si no hay real cargado para ese mes, usar budget
+        ingresoAnualProyectado += budgetForCategory(cat, mes);
+      }
+    });
+  });
+
+  const imp = calcImpuesto(ingresoAnualProyectado);
+
+  // === 2) Banner con resumen impositivo ===
+  const banner = document.getElementById('forecast-tax-banner');
+  if (banner){
+    banner.innerHTML = `
+      <div class="tax-banner-grid">
+        <div><span class="tb-label">Ingreso anual proyectado</span><span class="tb-value">${fmt(ingresoAnualProyectado)} CHF</span></div>
+        <div><span class="tb-label">Tasa C0</span><span class="tb-value">${imp.pct.toFixed(2)}%</span></div>
+        <div><span class="tb-label">Impuesto anual estimado</span><span class="tb-value">${fmt(imp.impuestoAnual)} CHF</span></div>
+        <div><span class="tb-label">Ahorro mensual ideal</span><span class="tb-value strong">${fmt(imp.ahorroMensual)} CHF/mes</span></div>
+      </div>
+    `;
+  }
+
+  // === 3) Tabla mes a mes ===
   const tbl = document.getElementById('tbl-forecast');
   tbl.innerHTML = `<thead><tr>
     <th>Mes</th>
     <th class="r">Ingresos</th>
     <th class="r">Gastos</th>
-    <th class="r">Mensualidad</th>
-    <th class="r">Rev-Ahorro</th>
-    <th class="r">Otros Rev</th>
+    <th class="r" title="Lo pagado real en Rev - Impuestos. Tooltip: ahorro ideal según baremo C0.">Ahorro Impuestos</th>
+    <th class="r">Ahorro Vacas Sofi</th>
+    <th class="r" title="Rev - Lili + Rev - CDP + Rev - Ahorro">Ahorro Casa</th>
     <th class="r">Balance</th>
     <th>Estado</th>
   </tr></thead><tbody></tbody>`;
   const tbody = tbl.querySelector('tbody');
   const labels = [], data = [];
-  let tIng=0, tGas=0, tMens=0, tAho=0, tOtros=0, tBal=0;
+  let tIng=0, tGas=0, tImp=0, tVac=0, tCasa=0, tBal=0;
 
   MESES.forEach(mes => {
     const ing = totalBySection('INGRESOS', mes);
     const gas = totalBySection('FIJOS', mes) + totalBySection('TARJETA', mes) +
                 totalBySection('ANUALES', mes) + totalBySection('OTROS', mes);
     const mens = totalBySection('MENSUALIDADES', mes);
-    const aho = expectedForCategory('Rev - Ahorro', mes);
-    const otros = ['Rev - Lili','Rev - CDP','Rev - Impuestos','Rev - Vacaciones Sofi']
+    const ahoImp = expectedForCategory('Rev - Impuestos', mes);
+    const ahoVac = expectedForCategory('Rev - Vacaciones Sofi', mes);
+    const ahoCasa = ['Rev - Lili','Rev - CDP','Rev - Ahorro']
       .reduce((s, c) => s + expectedForCategory(c, mes), 0);
-    const bal = ing - gas - mens - aho - otros;
-    tIng+=ing; tGas+=gas; tMens+=mens; tAho+=aho; tOtros+=otros; tBal+=bal;
+    // Balance del mes = ingresos - gastos - mens - todos los ahorros
+    const bal = ing - gas - mens - ahoImp - ahoVac - ahoCasa;
+    tIng+=ing; tGas+=gas; tImp+=ahoImp; tVac+=ahoVac; tCasa+=ahoCasa; tBal+=bal;
 
     let chip;
     if (bal < -100) chip = '<span class="chip red"><span class="chip-dot"></span>déficit</span>';
     else if (bal < 500) chip = '<span class="chip amber"><span class="chip-dot"></span>ajustado</span>';
     else chip = '<span class="chip green"><span class="chip-dot"></span>ok</span>';
+
+    // Tooltip de Ahorro Impuestos: comparar con ideal mensual según baremo
+    const diffImp = ahoImp - imp.ahorroMensual;
+    const tooltipImp = `<div class="tt-header">${escapeHTML(mes)} - Impuestos</div>
+      <div class="tt-body">
+        <div class="tt-row"><span class="tt-label">Ahorrado este mes</span><span class="tt-amount">${fmt(ahoImp)}</span></div>
+        <div class="tt-row"><span class="tt-label">Ideal según baremo C0</span><span class="tt-amount">${fmt(imp.ahorroMensual)}</span></div>
+      </div>
+      <div class="tt-total"><span>Diferencia</span><span style="color:${diffImp >= 0 ? '#10b981' : '#ef4444'}">${fmt(diffImp)}</span></div>`;
 
     const tr = document.createElement('tr');
     tr.className = 'forecast-row' + (mes === currentMonth ? ' current' : '');
@@ -3377,9 +3497,9 @@ function renderForecast(){
       <td class="label">${mes}</td>
       <td class="num dim">${fmt(ing)}</td>
       <td class="num dim">${fmt(gas)}</td>
-      <td class="num dim">${fmt(mens)}</td>
-      <td class="num dim">${fmt(aho)}</td>
-      <td class="num dim">${fmt(otros)}</td>
+      <td class="num dim has-tooltip" data-tooltip='${tooltipImp.replace(/'/g, "&#39;")}'>${fmt(ahoImp)}</td>
+      <td class="num dim">${fmt(ahoVac)}</td>
+      <td class="num dim">${fmt(ahoCasa)}</td>
       <td class="num"><b>${fmt(bal)}</b></td>
       <td>${chip}</td>
     `;
@@ -3394,9 +3514,9 @@ function renderForecast(){
     <td class="label">Total anual</td>
     <td class="num">${fmt(tIng)}</td>
     <td class="num">${fmt(tGas)}</td>
-    <td class="num">${fmt(tMens)}</td>
-    <td class="num">${fmt(tAho)}</td>
-    <td class="num">${fmt(tOtros)}</td>
+    <td class="num">${fmt(tImp)}</td>
+    <td class="num">${fmt(tVac)}</td>
+    <td class="num">${fmt(tCasa)}</td>
     <td class="num">${fmt(tBal)}</td>
     <td></td>
   `;
